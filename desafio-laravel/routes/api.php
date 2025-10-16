@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VideoController;
 
 // Login e logout
 Route::post('/login', [AuthController::class, 'login']);
@@ -33,3 +34,18 @@ Route::middleware('auth:sanctum')->delete('/users/{id}', [\App\Http\Controllers\
 
 // Endpoint de teste
 Route::get('/health', fn() => ['status' => 'ok']);
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Vídeos
+    Route::get('/videos', [VideoController::class, 'index']);          // Todos os vídeos
+    Route::get('/videos/user', [VideoController::class, 'userVideos']); // Vídeos do usuário logado
+    Route::get('/videos/{id}', [VideoController::class, 'show']);      // Mostrar vídeo
+    Route::post('/videos', [VideoController::class, 'store']);         // Criar vídeo
+    Route::put('/videos/{id}', [VideoController::class, 'update']);    // Atualizar
+    Route::delete('/videos/{id}', [VideoController::class, 'destroy']); // Deletar
+    Route::post('/videos/{id}/watched', [VideoController::class, 'markWatched']); // Marcar assistido
+
+    // Streaming proxy
+    Route::get('/video/{filename}', [VideoController::class, 'stream']);
+});

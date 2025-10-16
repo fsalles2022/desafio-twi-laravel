@@ -13,4 +13,10 @@ class User extends Authenticatable
 
     protected $fillable = ['name', 'email', 'password', 'image'];
     protected $hidden = ['password', 'remember_token'];
+
+
+    public function videos()
+    {
+        return $this->belongsToMany(Video::class)->withPivot('watched')->withTimestamps();
+    }
 }
