@@ -1,48 +1,100 @@
 import express from "express";
 import cors from "cors";
+import multer from "multer";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
-const PORT = 4000;
-const VIDEOS_DIR = path.resolve("./videos");
+// Pasta onde os vídeos serão armazenados
+const uploadPath = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath, { recursive: true });
+}
 
-// Endpoint que retorna a lista de vídeos
-app.get("/videos", (req, res) => {
-  const files = fs.readdirSync(VIDEOS_DIR);
-  const videos = files.map(f => ({ name: f }));
-  res.json(videos);
+// Configuração do multer (upload de vídeo)
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
 });
+const upload = multer({ storage });
 
-// Endpoint de streaming
+// ========================
+// 📤 Upload de vídeo
+// ========================
+
+
+// ========================
+// 🎥 Stream de vídeo
+// ========================
 app.get("/stream/:filename", (req, res) => {
-  const filePath = path.join(VIDEOS_DIR, req.params.filename);
-  if (!fs.existsSync(filePath)) return res.status(404).send("Vídeo não encontrado");
+    const filePath = path.join(uploadPath, req.params.filename);
 
-  const stat = fs.statSync(filePath);
-  const fileSize = stat.size;
-  const range = req.headers.range;
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: "Vídeo não encontrado" });
+    }
 
-  if (!range) {
-    res.writeHead(200, { "Content-Length": fileSize, "Content-Type": "video/mp4" });
-    fs.createReadStream(filePath).pipe(res);
-  } else {
-    const parts = range.replace(/bytes=/, "").split("-");
-    const start = parseInt(parts[0], 10);
-    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-    const chunkSize = end - start + 1;
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
 
-    const head = {
-      "Content-Range": `bytes ${start}-${end}/${fileSize}`,
-      "Accept-Ranges": "bytes",
-      "Content-Length": chunkSize,
-      "Content-Type": "video/mp4"
-    };
-    res.writeHead(206, head);
-    fs.createReadStream(filePath, { start, end }).pipe(res);
-  }
+    if (range) {
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+        const chunkSize = end - start + 1;
+        const file = fs.createReadStream(filePath, { start, end });
+        const head = {
+            "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+            "Accept-Ranges": "bytes",
+            "Content-Length": chunkSize,
+            "Content-Type": "video/mp4",
+        };
+
+        res.writeHead(206, head);
+        file.pipe(res);
+    } else {
+        const head = {
+            "Content-Length": fileSize,
+            "Content-Type": "video/mp4",
+        };
+        res.writeHead(200, head);
+        fs.createReadStream(filePath).pipe(res);
+    }
 });
 
-app.listen(PORT, () => console.log(`🎥 Video service running at http://localhost:${PORT}`));
+// ========================
+// 🚀 Iniciar servidor
+// ========================
+const PORT = 4000;
+// ========================
+// 📤 Upload de vídeo
+// ========================
+app.post("/upload", upload.single("file"), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: "Nenhum arquivo enviado" });
+    }
+
+    console.log("✅ Vídeo recebido:", req.file.originalname);
+
+    res.json({
+        message: "Upload realizado com sucesso",
+        filename: req.file.filename,
+        path: `/uploads/${req.file.filename}`,
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`✅ Node Video Service rodando em http://localhost:${PORT}`);
+});

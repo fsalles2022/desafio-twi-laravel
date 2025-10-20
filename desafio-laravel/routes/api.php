@@ -1,51 +1,43 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Response;
 
-// Login e logout
+// Login / Logout
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
-Route::middleware('auth:sanctum')->get('/video/{filename}', function ($filename) {
-    $nodeUrl = "http://localhost:4000/stream/{$filename}";
-
-    try {
-        $response = Http::withHeaders([
-            'Range' => request()->header('Range'),
-        ])->get($nodeUrl);
-
-        return Response::make($response->body(), $response->status(), $response->headers());
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Falha no proxy: ' . $e->getMessage()], 500);
-    }
-});
-
-
-// Rotas de usuário (exemplo)
-Route::middleware('auth:sanctum')->get('/users', [\App\Http\Controllers\UserController::class, 'index']);
-Route::middleware('auth:sanctum')->get('/users/{id}', [\App\Http\Controllers\UserController::class, 'show']);
-Route::middleware('auth:sanctum')->put('/users/{id}', [\App\Http\Controllers\UserController::class, 'update']);
-Route::middleware('auth:sanctum')->post('/users', [\App\Http\Controllers\UserController::class, 'store']);
-Route::middleware('auth:sanctum')->delete('/users/{id}', [\App\Http\Controllers\UserController::class, 'destroy']);
-
-// Endpoint de teste
-Route::get('/health', fn() => ['status' => 'ok']);
-
+// Rotas de usuários (proteção com Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/users', [\App\Http\Controllers\UserController::class, 'index']);
+    Route::get('/users/{id}', [\App\Http\Controllers\UserController::class, 'show']);
+    Route::put('/users/{id}', [\App\Http\Controllers\UserController::class, 'update']);
+    Route::post('/users', [\App\Http\Controllers\UserController::class, 'store']);
+    Route::delete('/users/{id}', [\App\Http\Controllers\UserController::class, 'destroy']);
 
-    // Vídeos
-    Route::get('/videos', [VideoController::class, 'index']);          // Todos os vídeos
-    Route::get('/videos/user', [VideoController::class, 'userVideos']); // Vídeos do usuário logado
-    Route::get('/videos/{id}', [VideoController::class, 'show']);      // Mostrar vídeo
-    Route::post('/videos', [VideoController::class, 'store']);         // Criar vídeo
-    Route::put('/videos/{id}', [VideoController::class, 'update']);    // Atualizar
-    Route::delete('/videos/{id}', [VideoController::class, 'destroy']); // Deletar
-    Route::post('/videos/{id}/watched', [VideoController::class, 'markWatched']); // Marcar assistido
+    // Vídeos (banco de dados)
+    Route::get('/videos', [VideoController::class, 'index']);          
+    Route::get('/videos/user', [VideoController::class, 'userVideos']); 
+    Route::get('/videos/{id}', [VideoController::class, 'show']);      
+    Route::post('/videos', [VideoController::class, 'store']);         
+    Route::put('/videos/{id}', [VideoController::class, 'update']);    
+    Route::delete('/videos/{id}', [VideoController::class, 'destroy']); 
+    Route::post('/videos/{id}/watched', [VideoController::class, 'markWatched']); 
 
-    // Streaming proxy
+    // Streaming proxy (videos do Node)
     Route::get('/video/{filename}', [VideoController::class, 'stream']);
+
+    // Listar vídeos diretamente da pasta Node
+    Route::get('/videos-node', function () {
+        $files = array_filter(scandir(storage_path('../video-service/videos')), fn($f) => !in_array($f, ['.', '..']));
+        $videos = array_map(fn($f) => [
+            'name' => $f,
+            'url'  => url("/api/video/{$f}"),
+        ], $files);
+        return response()->json(array_values($videos));
+    });
 });
