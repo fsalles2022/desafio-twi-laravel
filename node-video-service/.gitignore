@@ -1,2 +1,57 @@
-node_modules
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+
+# Build / dist
+dist/
+build/
+.cache/
+.vite/
+.temp/
+
+# Ambiente
 .env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+storage/logs/*
+laravel.log
+
+# Laravel
+/vendor/
+public/storage
+storage/*.key
+bootstrap/cache/*.php
+
+# Docker
+docker-compose.override.yml
+.docker/
+*.pid
+
+# IDE / Sistema
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Vídeos e uploads grandes
+node-video-service/uploads/*.mp4
+node-video-service/uploads/*.avi
+node-video-service/uploads/*.mov
+node-video-service/uploads/*.mkv
+
+# Backups
+*.bak
+*.old
+*.zip
+*.tar
+*.gz
+*.rar
