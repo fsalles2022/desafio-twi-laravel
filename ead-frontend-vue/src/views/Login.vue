@@ -2,7 +2,7 @@
   <div class="login-wrapper">
     <div class="background"></div>
 
-    <div class="login-card animate__animated animate__fadeInUp">
+    <div class="login-card">
       <h2 class="text-center mb-4 fw-bold text-primary">Acesse sua conta</h2>
 
       <form @submit.prevent="login">
@@ -15,12 +15,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { ref } from "vue"
+import { useAuthStore } from "../stores/auth"
 
 const auth = useAuthStore()
-const email = ref('')
-const password = ref('')
+const email = ref("")
+const password = ref("")
 
 const login = async () => {
   await auth.login(email.value, password.value)
@@ -28,44 +28,44 @@ const login = async () => {
 </script>
 
 <style scoped>
-/* Fundo com Parallax e leve animação */
+/* Wrapper geral */
 .login-wrapper {
   min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
   overflow: hidden;
+  background: #0d6efd;
   position: relative;
 }
 
+/* Fundo com efeito suave */
 .background {
   position: absolute;
   inset: 0;
-  background: url("https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1500&q=80")
+  background: url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80")
     center/cover no-repeat fixed;
-  filter: brightness(0.6);
-  transform: scale(1.1);
   z-index: 0;
-  animation: subtleZoom 20s ease-in-out infinite alternate;
+  filter: brightness(0.6);
+  animation: moveBg 20s ease-in-out infinite alternate;
 }
 
-/* Card de Login */
+/* Card central */
 .login-card {
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
+  border-radius: 15px;
   padding: 2rem;
-  border-radius: 16px;
   width: 100%;
   max-width: 380px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  animation: floaty 6s ease-in-out infinite;
 }
 
-/* Inputs */
+/* Inputs e botão */
 input {
-  display: block;
   width: 100%;
   margin-bottom: 15px;
   padding: 12px;
@@ -80,7 +80,6 @@ input:focus {
   outline: none;
 }
 
-/* Botão */
 button {
   width: 100%;
   padding: 12px;
@@ -97,8 +96,8 @@ button:hover {
   box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
 }
 
-/* Animação sutil de fundo */
-@keyframes subtleZoom {
+/* Animações */
+@keyframes moveBg {
   from {
     transform: scale(1);
   }
@@ -107,14 +106,24 @@ button:hover {
   }
 }
 
-/* Responsividade */
-@media (max-width: 576px) {
-  .login-card {
-    padding: 1.5rem;
-    border-radius: 12px;
-    max-width: 90%;
+@keyframes floaty {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 
-@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+/* Responsivo */
+@media (max-width: 576px) {
+  .login-card {
+    padding: 1.5rem;
+    border-radius: 10px;
+    max-width: 90%;
+  }
+}
 </style>
