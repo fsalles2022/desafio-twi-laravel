@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\CourseController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Response;
 
@@ -18,6 +19,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/users/{id}', [\App\Http\Controllers\UserController::class, 'update']);
     Route::post('/users', [\App\Http\Controllers\UserController::class, 'store']);
     Route::delete('/users/{id}', [\App\Http\Controllers\UserController::class, 'destroy']);
+
+    // course
+    Route::get('/course', [CourseController::class, 'index']);
+    Route::get('/course/{id}', [CourseController::class, 'show']);
+    Route::post('/course', [CourseController::class, 'store']);
+    Route::put('/course/{course}', [CourseController::class, 'update']);
+    Route::delete('/course/{course}', [CourseController::class, 'destroy']);
+
 
     // Vídeos (banco de dados)
     Route::get('/videos', [VideoController::class, 'index']);          

@@ -23,8 +23,13 @@ class Video extends Model
     public function users()
     {
         return $this->belongsToMany(User::class)
-                    ->withPivot('watched')
-                    ->withTimestamps();
+            ->withPivot('watched')
+            ->withTimestamps();
+    }
+
+    public function Course()
+    {
+        return $this->belongsTo(Course::class);
     }
 
     /**
