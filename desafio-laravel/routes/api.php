@@ -4,49 +4,55 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\CourseController;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Response;
+use App\Http\Controllers\UserController;
 
 // Login / Logout
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
-// Rotas de usuários (proteção com Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/users', [\App\Http\Controllers\UserController::class, 'index']);
-    Route::get('/users/{id}', [\App\Http\Controllers\UserController::class, 'show']);
-    Route::put('/users/{id}', [\App\Http\Controllers\UserController::class, 'update']);
-    Route::post('/users', [\App\Http\Controllers\UserController::class, 'store']);
-    Route::delete('/users/{id}', [\App\Http\Controllers\UserController::class, 'destroy']);
 
-    // course
-    Route::get('/course', [CourseController::class, 'index']);
-    Route::get('/course/{id}', [CourseController::class, 'show']);
-    Route::post('/course', [CourseController::class, 'store']);
-    Route::put('/course/{course}', [CourseController::class, 'update']);
-    Route::delete('/course/{course}', [CourseController::class, 'destroy']);
+    // USERS
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::put('/{id}', [UserController::class, 'update']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
 
+    // COURSES
+    Route::prefix('courses')->group(function () {
+        Route::get('/', [CourseController::class, 'index']);
+        Route::post('/', [CourseController::class, 'store']);
+        Route::get('/{course}', [CourseController::class, 'show']);
+        Route::put('/{course}', [CourseController::class, 'update']);
+        Route::delete('/{course}', [CourseController::class, 'destroy']);
+    });
 
-    // Vídeos (banco de dados)
-    Route::get('/videos', [VideoController::class, 'index']);          
-    Route::get('/videos/user', [VideoController::class, 'userVideos']); 
-    Route::get('/videos/{id}', [VideoController::class, 'show']);      
-    Route::post('/videos', [VideoController::class, 'store']);         
-    Route::put('/videos/{id}', [VideoController::class, 'update']);    
-    Route::delete('/videos/{id}', [VideoController::class, 'destroy']); 
-    Route::post('/videos/{id}/watched', [VideoController::class, 'markWatched']); 
+    // VIDEOS
+    Route::prefix('videos')->group(function () {
+        Route::get('/', [VideoController::class, 'index']);
+        Route::post('/', [VideoController::class, 'store']);
+        Route::get('/user', [VideoController::class, 'userVideos']);
+        Route::get('/{id}', [VideoController::class, 'show']);
+        Route::put('/{id}', [VideoController::class, 'update']);
+        Route::delete('/{id}', [VideoController::class, 'destroy']);
+        Route::post('/{id}/watched', [VideoController::class, 'markWatched']);
+    });
 
-    // Streaming proxy (videos do Node)
-    Route::get('/video/{filename}', [VideoController::class, 'stream']);
+    // Streaming do Node
+    Route::get('/video/stream/{filename}', [VideoController::class, 'stream']);
 
-    // Listar vídeos diretamente da pasta Node
+    // Listar vídeos da pasta Node
     Route::get('/videos-node', function () {
         $files = array_filter(scandir(storage_path('../video-service/videos')), fn($f) => !in_array($f, ['.', '..']));
         $videos = array_map(fn($f) => [
             'name' => $f,
-            'url'  => url("/api/video/{$f}"),
+            'url'  => url("/api/video/stream/{$f}"),
         ], $files);
+
         return response()->json(array_values($videos));
     });
 });

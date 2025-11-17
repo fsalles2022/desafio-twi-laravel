@@ -11,6 +11,7 @@ class Video extends Model
 
     // Campos que podem ser preenchidos via create/update
     protected $fillable = [
+        'course_id',
         'title',
         'filename',
     ];
