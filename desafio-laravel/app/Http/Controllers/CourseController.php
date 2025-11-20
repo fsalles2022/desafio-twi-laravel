@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use Illuminate\Http\Request;
-use App\Repositories\CourseRepository;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use App\Repositories\CourseRepository;
 
 class CourseController extends Controller
 {
@@ -19,7 +19,6 @@ class CourseController extends Controller
 
     public function videos(Course $course)
     {
-        // pega o curso e seus vídeos
         $course->load('videos');
 
         return response()->json([
@@ -33,7 +32,6 @@ class CourseController extends Controller
         $user = Auth::user();
         return response()->json($this->repo->allForUser($user->id));
     }
-
 
     public function show($id)
     {
@@ -58,7 +56,6 @@ class CourseController extends Controller
         return response()->json($course, 201);
     }
 
-
     public function update(Request $request, Course $course)
     {
         $data = $request->validate([
@@ -82,5 +79,34 @@ class CourseController extends Controller
         $this->repo->delete($course);
 
         return response()->json(['message' => 'Course deleted']);
+    }
+
+    /**
+     * Matricular estudante em um curso
+     */
+    public function enroll(Request $request, $courseId)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $course = Course::findOrFail($courseId);
+
+        // Evitar duplicidade
+        if ($course->students()->where('user_id', $request->user_id)->exists()) {
+            return response()->json([
+                'message' => 'O aluno já está matriculado neste curso.'
+            ], 409);
+        }
+
+        $course->students()->attach($request->user_id, [
+            'progress'      => 0,
+            'completed_at'  => null,
+        ]);
+
+        return response()->json([
+            'message' => 'Aluno matriculado com sucesso.',
+            'course'  => $course
+        ], 201);
     }
 }
