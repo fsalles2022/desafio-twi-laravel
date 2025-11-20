@@ -23,10 +23,17 @@ class Course extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
 
     public function videos()
     {
         return $this->hasMany(Video::class);
+    }
+
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'course_user')
+            ->withPivot('progress', 'completed_at')
+            ->withTimestamps();
     }
 }
