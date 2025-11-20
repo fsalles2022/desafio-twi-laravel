@@ -2,8 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Videos from '../views/Videos.vue'
-import CoursesList from '../views/CourseList.vue'
-import CourseVideos from '../views/CourseVideos.vue'
 import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
@@ -21,7 +19,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-    // LISTA DE CURSOS (para o usuário)
+    // LISTA DE CURSOS
     {
       path: '/courses',
       name: 'courses',
@@ -46,15 +44,25 @@ const router = createRouter({
   ],
 })
 
-// AUTENTICAÇÃO
-router.beforeEach((to, from, next) => {
+// 🔥 Middleware de autenticação + definição de Layout
+router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
 
+  // se a rota precisa de login
   if (to.meta.requiresAuth && !auth.token) {
-    next('/login')
-  } else {
-    next()
+    return next('/login')
   }
+
+  // define dinamicamente o layout APÓS logado
+  if (auth.user) {
+    const isTeacher = auth.user.roles?.includes('teacher')
+
+    auth.currentLayout = isTeacher
+      ? 'TeacherLayout'
+      : 'StudentLayout'
+  }
+
+  next()
 })
 
 export default router

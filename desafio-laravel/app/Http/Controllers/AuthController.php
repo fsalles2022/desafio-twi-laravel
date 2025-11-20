@@ -15,15 +15,17 @@ class AuthController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:3|confirmed',
-
+            'role'     => 'required|in:student,teacher,admin', // 🔥 obrigatório
         ]);
 
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'password_confirmation' => Hash::make($request->password_confirmation),
         ]);
+
+        // 🔥 atribui o papel ao usuário
+        $user->assignRole($request->role);
 
         $token = $user->createToken('api-token')->plainTextToken;
 
@@ -32,7 +34,7 @@ class AuthController extends Controller
             'token' => $token,
         ], 201);
     }
-    
+
     public function login(Request $request)
     {
         $request->validate([
