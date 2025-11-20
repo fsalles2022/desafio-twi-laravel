@@ -29,7 +29,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{course}', [CourseController::class, 'show']);
         Route::put('/{course}', [CourseController::class, 'update']);
         Route::delete('/{course}', [CourseController::class, 'destroy']);
+
+        // AQUI: curso + vídeos
+        Route::get('/{course}/videos', [CourseController::class, 'videos']);
     });
+
 
     // VIDEOS
     Route::prefix('videos')->group(function () {

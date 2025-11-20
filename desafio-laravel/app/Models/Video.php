@@ -28,10 +28,11 @@ class Video extends Model
             ->withTimestamps();
     }
 
-    public function Course()
+    public function course()
     {
         return $this->belongsTo(Course::class);
     }
+
 
     /**
      * Retorna a URL completa do vídeo via Laravel

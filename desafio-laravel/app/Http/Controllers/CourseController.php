@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Repositories\CourseRepository;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
@@ -17,10 +17,23 @@ class CourseController extends Controller
         $this->repo = $repo;
     }
 
+    public function videos(Course $course)
+    {
+        // pega o curso e seus vídeos
+        $course->load('videos');
+
+        return response()->json([
+            'course' => $course,
+            'videos' => $course->videos
+        ]);
+    }
+
     public function index()
     {
-        return response()->json($this->repo->all());
+        $user = Auth::user();
+        return response()->json($this->repo->allForUser($user->id));
     }
+
 
     public function show($id)
     {
@@ -38,7 +51,7 @@ class CourseController extends Controller
         ]);
 
         $data['slug'] = Str::slug($request->title);
-        $data['user_id'] = $request->user_id ?? auth()->id();
+        $data['user_id'] = $data['user_id'] ?? Auth::id();
 
         $course = $this->repo->create($data);
 

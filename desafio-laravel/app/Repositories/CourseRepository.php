@@ -6,14 +6,14 @@ use App\Models\Course;
 
 class CourseRepository
 {
-    public function all()
+    public function allForUser($userId)
     {
-        return Course::with('user')->orderBy('id','desc')->get();
+        return Course::where('user_id', $userId)->with('user')->get();
     }
 
     public function find($id)
     {
-        return Course::with('videos')->findOrFail($id);
+        return Course::with('user')->findOrFail($id);
     }
 
     public function create(array $data)

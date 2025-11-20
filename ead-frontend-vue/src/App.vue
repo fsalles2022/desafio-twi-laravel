@@ -35,6 +35,11 @@ onMounted(() => {
             </li>
             <li class="nav-item">
               <RouterLink to="/videos" class="nav-link text-white fw-semibold">
+                Videos
+              </RouterLink>
+            </li>
+                 <li class="nav-item">
+              <RouterLink to="/courses" class="nav-link text-white fw-semibold">
                 Meus Cursos
               </RouterLink>
             </li>
