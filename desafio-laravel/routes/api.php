@@ -21,9 +21,9 @@ Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logo
 Route::middleware('auth:sanctum')->group(function () {
 
     // -------------------------
-    //  USERS
-    // -------------------------
-    Route::prefix('users')->group(function () {
+    //  USERS (somente teacher pode gerenciar usuários)
+// -------------------------
+    Route::prefix('users')->middleware('role:teacher')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::get('/{id}', [UserController::class, 'show']);
@@ -33,40 +33,37 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // -------------------------
-    //  COURSES (acesso geral)
+    //  COURSES - acesso geral (teacher e student)
     // -------------------------
     Route::prefix('courses')->group(function () {
 
         Route::get('/', [CourseController::class, 'index']);
         Route::get('/{course}', [CourseController::class, 'show']);
 
-        // Vídeos do curso
+        // vídeos do curso
         Route::get('/{course}/videos', [CourseController::class, 'videos']);
     });
 
 
     // -------------------------
-    //  COURSES (somente TEACHER)
+    //  COURSES (somente TEACHER pode CRUD)
     // -------------------------
-    Route::middleware('role:teacher')->group(function () {
-
-        Route::prefix('courses')->group(function () {
-            Route::post('/', [CourseController::class, 'store']);
-            Route::put('/{course}', [CourseController::class, 'update']);
-            Route::delete('/{course}', [CourseController::class, 'destroy']);
-        });
+    Route::prefix('courses')->middleware('role:teacher')->group(function () {
+        Route::post('/', [CourseController::class, 'store']);
+        Route::put('/{course}', [CourseController::class, 'update']);
+        Route::delete('/{course}', [CourseController::class, 'destroy']);
     });
 
 
     // -------------------------
-    //  ROTA DE TESTE (roles)
+    //  TESTE / ME
     // -------------------------
-    Route::get('/me', function () {
-        return [
-            'user'  => auth()->user(),
-            'roles' => auth()->user()->getRoleNames()
-        ];
-    });
+    // Route::get('/me', function () {
+    //     return [
+    //         'user'  => auth()->user(),
+    //         'roles' => auth()->user()->getRoleNames()
+    //     ];
+    // });
 
 
     // -------------------------
@@ -78,26 +75,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', [VideoController::class, 'userVideos']);
         Route::get('/{id}', [VideoController::class, 'show']);
 
-        // somente professor pode criar/editar/deletar vídeos
+        // somente teacher
         Route::middleware('role:teacher')->group(function () {
             Route::post('/', [VideoController::class, 'store']);
             Route::put('/{id}', [VideoController::class, 'update']);
             Route::delete('/{id}', [VideoController::class, 'destroy']);
         });
 
-        // aluno marca como assistido
-        Route::post('/{id}/watched', [VideoController::class, 'markWatched']);
+        // aluno marca como assistido (student)
+        Route::post('/{id}/watched', [VideoController::class, 'markWatched'])
+              ->middleware('role:student');
     });
 
 
     // -------------------------
-    //  STREAMING DO NODE
+    //  STREAM DO NODE
     // -------------------------
     Route::get('/video/stream/{filename}', [VideoController::class, 'stream']);
 
 
     // -------------------------
-    //  LISTA DE VÍDEOS DIRETO DA PASTA DO NODE
+    //  LISTA DE VÍDEOS NA PASTA
     // -------------------------
     Route::get('/videos-node', function () {
         $path = storage_path('../video-service/videos');
