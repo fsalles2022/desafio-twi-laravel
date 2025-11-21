@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // -------------------------
     //  USERS (somente teacher pode gerenciar usuários)
-// -------------------------
+    // -------------------------
     Route::prefix('users')->middleware('role:teacher')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
@@ -48,11 +48,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // -------------------------
     //  COURSES (somente TEACHER pode CRUD)
     // -------------------------
-    Route::prefix('courses')->middleware('role:teacher')->group(function () {
-        Route::post('/', [CourseController::class, 'store']);
-        Route::put('/{course}', [CourseController::class, 'update']);
-        Route::delete('/{course}', [CourseController::class, 'destroy']);
-    });
+   Route::prefix('courses')->middleware('role:teacher')->group(function () {
+
+    Route::post('/', [CourseController::class, 'store']);
+    Route::put('/{course}', [CourseController::class, 'update']);
+    Route::delete('/{course}', [CourseController::class, 'destroy']);
+
+});
 
 
     // -------------------------
@@ -84,7 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // aluno marca como assistido (student)
         Route::post('/{id}/watched', [VideoController::class, 'markWatched'])
-              ->middleware('role:student');
+            ->middleware('role:student');
     });
 
 

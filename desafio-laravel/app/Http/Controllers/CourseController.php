@@ -8,10 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\CourseRepository;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CourseController extends Controller
 {
     protected $repo;
+    use AuthorizesRequests;
 
     public function __construct(CourseRepository $repo)
     {
@@ -19,58 +21,44 @@ class CourseController extends Controller
     }
 
     /**
-     * Retorna vídeos do curso
-     */
-    public function videos(Course $course)
-    {
-        $course->load('videos');
-
-        return response()->json([
-            'course' => $course,
-            'videos' => $course->videos
-        ]);
-    }
-
-    /**
-     * Listagem de cursos conforme ROLE
-     * teacher → cursos criados
-     * student → cursos matriculados
+     * Lista cursos do usuário autenticado
      */
     public function index()
     {
         $user = Auth::user();
-        $user = User::find($user->id);
+        $user = User::with('roles')->find($user->id);
 
+        // Teachers veem cursos criados por eles
         if ($user->hasRole('teacher')) {
-            $courses = $this->repo->getCoursesForTeacher($user->id);
-        } else {
-            $courses = $this->repo->getCoursesForStudent($user->id);
+            return response()->json($this->repo->allForUser($user->id));
         }
 
-        return response()->json($courses);
+        // Students veem cursos disponíveis e matriculados
+        if ($user->hasRole('student')) {
+            return response()->json([
+                'my_courses'  => $user->studentCourses()->with('teacher')->get(),
+                'all_courses' => Course::where('status', 'active')->with('teacher')->get(),
+            ]);
+        }
+
+        return response()->json([], 403);
     }
 
     /**
-     * Mostrar curso
+     * Mostrar 1 curso com relacionamento básico
      */
-    public function show($id)
+    public function show(Course $course)
     {
-        return response()->json($this->repo->find($id));
+        $course->load(['videos', 'teacher']);
+        return response()->json($course);
     }
 
     /**
-     * Criar curso (somente teacher)
+     * Criar curso (somente TEACHER)
      */
     public function store(Request $request)
     {
-        $user = Auth::user();
-        $user = User::find($user->id);
-
-        if (!$user->hasRole('teacher')) {
-            return response()->json([
-                'message' => 'Apenas professores podem criar cursos.'
-            ], 403);
-        }
+        $this->authorize('create', Course::class);
 
         $data = $request->validate([
             'title'         => 'required|string|max:255',
@@ -79,8 +67,18 @@ class CourseController extends Controller
             'status'        => 'in:active,inactive',
         ]);
 
-        $data['slug'] = Str::slug($data['title']);
-        $data['user_id'] = $user->id;
+        $baseSlug = Str::slug($data['title']);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        // garantir slug único
+        while (Course::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        $data['slug'] = $slug;
+        $data['user_id'] = auth()->id();
 
         $course = $this->repo->create($data);
 
@@ -88,17 +86,11 @@ class CourseController extends Controller
     }
 
     /**
-     * Atualizar curso
+     * Atualizar curso (somente TEACHER dono do curso)
      */
     public function update(Request $request, Course $course)
     {
-        $user = Auth::user();
-
-        if ($course->user_id !== $user->id) {
-            return response()->json([
-                'message' => 'Você não tem permissão para editar este curso.'
-            ], 403);
-        }
+        $this->authorize('update', $course);
 
         $data = $request->validate([
             'title'        => 'sometimes|string|max:255',
@@ -111,23 +103,17 @@ class CourseController extends Controller
             $data['slug'] = Str::slug($data['title']);
         }
 
-        $updated = $this->repo->update($course, $data);
+        $course = $this->repo->update($course, $data);
 
-        return response()->json($updated);
+        return response()->json($course);
     }
 
     /**
-     * Deletar curso
+     * Deletar curso (somente TEACHER dono)
      */
     public function destroy(Course $course)
     {
-        $user = Auth::user();
-
-        if ($course->user_id !== $user->id) {
-            return response()->json([
-                'message' => 'Você não tem permissão para excluir este curso.'
-            ], 403);
-        }
+        $this->authorize('delete', $course);
 
         $this->repo->delete($course);
 
@@ -135,7 +121,20 @@ class CourseController extends Controller
     }
 
     /**
-     * Matricular estudante
+     * Trazer os vídeos do curso
+     */
+    public function videos(Course $course)
+    {
+        $course->load('videos');
+
+        return response()->json([
+            'course' => $course,
+            'videos' => $course->videos
+        ]);
+    }
+
+    /**
+     * Matricular aluno em curso
      */
     public function enroll(Request $request, $courseId)
     {
@@ -147,13 +146,13 @@ class CourseController extends Controller
 
         if ($course->students()->where('user_id', $request->user_id)->exists()) {
             return response()->json([
-                'message' => 'O aluno já está matriculado neste curso.'
+                'message' => 'Aluno já matriculado.'
             ], 409);
         }
 
         $course->students()->attach($request->user_id, [
-            'progress'      => 0,
-            'completed_at'  => null,
+            'progress' => 0,
+            'completed_at' => null,
         ]);
 
         return response()->json([
