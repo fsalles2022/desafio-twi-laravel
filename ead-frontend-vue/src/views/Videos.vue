@@ -6,11 +6,13 @@
       <div class="spinner-border text-primary"></div>
     </div>
 
-    <div v-else-if="videos.length" class="row">
+    <div v-else-if="videos.length" class="row g-4">
       <MediaCardAdvanced v-for="v in videos" :key="v.id" :media="v" />
     </div>
 
-    <div v-else class="text-muted text-center">Nenhum vídeo ou áudio disponível</div>
+    <div v-else class="text-muted text-center">
+      Nenhum vídeo ou áudio disponível
+    </div>
   </div>
 </template>
 
@@ -26,15 +28,28 @@ const auth = useAuthStore()
 
 const fetchVideos = async () => {
   try {
-    const res = await axios.get('http://localhost:8000/api/videos/user', { headers: { Authorization: `Bearer ${auth.token}` } })
-    videos.value = res.data.map(v => ({ ...v, type: getMimeType(v.filename) }))
-  } catch (err) { console.error(err) }
-  finally { loading.value = false }
+    const res = await axios.get(
+      'http://localhost:8000/api/videos/user',
+      { headers: { Authorization: `Bearer ${auth.token}` } }
+    )
+
+    // Mapeia cada vídeo adicionando type e url para streaming
+    videos.value = res.data.map(v => ({
+      ...v,
+      type: getMimeType(v.filename),
+      url: `http://localhost:4000/stream/${v.filename}`
+    }))
+  } catch (err) {
+    console.error('Erro ao buscar vídeos:', err)
+  } finally {
+    loading.value = false
+  }
 }
 
+// Função para definir tipo MIME do arquivo
 const getMimeType = (filename) => {
   const ext = filename.split('.').pop().toLowerCase()
-  if (['mp4','mov','avi'].includes(ext)) return 'video/mp4'
+  if (['mp4', 'mov', 'avi'].includes(ext)) return 'video/mp4'
   if (['mp3'].includes(ext)) return 'audio/mp3'
   if (['jpg','jpeg','png','webp'].includes(ext)) return 'image/' + ext
   return 'application/octet-stream'
