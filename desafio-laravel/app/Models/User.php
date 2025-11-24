@@ -21,9 +21,17 @@ class User extends Authenticatable
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'course_user')
-                    ->withPivot('progress', 'completed_at')
-                    ->withTimestamps();
+            ->withPivot('progress', 'completed_at')
+            ->withTimestamps();
     }
+
+    public function videos()
+    {
+        return $this->belongsToMany(Video::class, 'video_watched')
+            ->withPivot('watched')
+            ->withTimestamps();
+    }
+
 
     /**
      * Cursos matriculados do aluno
@@ -31,8 +39,8 @@ class User extends Authenticatable
     public function enrolledCourses()
     {
         return $this->belongsToMany(Course::class, 'course_user', 'user_id', 'course_id')
-                    ->withPivot('progress', 'completed_at')
-                    ->withTimestamps();
+            ->withPivot('progress', 'completed_at')
+            ->withTimestamps();
     }
 
     /**
@@ -49,7 +57,7 @@ class User extends Authenticatable
     public function watchedVideos()
     {
         return $this->belongsToMany(Video::class, 'video_watched')
-                    ->withPivot('watched')
-                    ->withTimestamps();
+            ->withPivot('watched')
+            ->withTimestamps();
     }
 }
