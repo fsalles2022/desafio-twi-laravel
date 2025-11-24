@@ -31,6 +31,12 @@ class Course extends Model
         return $this->hasMany(Video::class);
     }
 
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+
     public function students()
     {
         return $this->belongsToMany(User::class, 'course_user')

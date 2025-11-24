@@ -28,17 +28,19 @@ class CourseController extends Controller
     {
         $user = User::with('roles')->find(Auth::id());
 
-
         // Teachers veem cursos criados por eles
         if ($user->hasRole('teacher')) {
-            return response()->json($this->repo->allForUser($user->id));
+            return response()->json([
+                'my_courses'  => $this->repo->allForUser($user->id),
+                'all_courses' => Course::where('status', 'active')->with('teacher')->get(),
+            ]);
         }
 
         // Students veem cursos disponíveis e matriculados
         if ($user->hasRole('student')) {
             return response()->json([
-                'my_courses'  => $user->studentCourses()->with('teacher')->get(),
-                'all_courses' => Course::where('status', 'active')->with('teacher')->get(),
+                'my_courses'  => $user->studentCourses()->with('teacher')->get(), // cursos matriculados
+                'all_courses' => Course::where('status', 'active')->with('teacher')->get(), // todos cursos ativos
             ]);
         }
 
@@ -50,6 +52,7 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
+        // Carrega vídeos e professor
         $course->load(['videos', 'teacher']);
         return response()->json($course);
     }
@@ -62,10 +65,10 @@ class CourseController extends Controller
         $this->authorize('create', Course::class);
 
         $data = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'title'        => 'required|string|max:255',
+            'description'  => 'nullable|string',
             'course_image' => 'nullable|image|max:2048',
-            'status'      => 'in:active,inactive',
+            'status'       => 'in:active,inactive',
         ]);
 
         // upload da imagem
@@ -99,13 +102,12 @@ class CourseController extends Controller
         $this->authorize('update', $course);
 
         $data = $request->validate([
-            'title'       => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
+            'title'        => 'sometimes|string|max:255',
+            'description'  => 'nullable|string',
             'course_image' => 'nullable|image|max:2048',
-            'status'      => 'in:active,inactive',
+            'status'       => 'in:active,inactive',
         ]);
 
-        // upload da imagem
         if ($request->hasFile('course_image')) {
             $path = $request->file('course_image')->store('courses', 'public');
             $data['course_image'] = $path;
@@ -186,7 +188,8 @@ class CourseController extends Controller
     public function watchedVideos($courseId)
     {
         $user = User::with('roles')->find(Auth::id());
-        $isEnrolled = $user->courses()->where('course_id', $courseId)->exists();
+
+        $isEnrolled = $user->enrolledCourses()->where('course_id', $courseId)->exists();
         if (! $isEnrolled) {
             return response()->json(['error' => 'Not enrolled'], 403);
         }
