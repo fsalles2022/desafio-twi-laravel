@@ -1,6 +1,6 @@
 <template>
   <div class="container py-4">
-    <h1 class="mb-4 text-center">📚 Meus Cursosss</h1>
+    <h1 class="mb-4 text-center">📚 Meus Cursos</h1>
 
     <div v-if="loading" class="text-center my-5">
       <div class="spinner-border text-primary"></div>
@@ -15,7 +15,6 @@
           <div class="card-body">
             <h5 class="card-title">{{ c.title }}</h5>
             <p class="text-muted">{{ c.description }}</p>
-
             <router-link :to="`/courses/${c.id}`" class="btn btn-primary w-100">
               Acessar Curso →
             </router-link>
