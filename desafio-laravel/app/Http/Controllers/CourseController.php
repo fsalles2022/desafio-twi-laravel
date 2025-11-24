@@ -72,6 +72,7 @@ class CourseController extends Controller
             $data['course_image'] = $request->file('course_image')->store('courses', 'public');
         }
 
+        // Gerar slug único
         $slug = Str::slug($data['title']);
         $counter = 1;
         while (Course::where('slug', $slug)->exists()) {
@@ -126,7 +127,7 @@ class CourseController extends Controller
     }
 
     /**
-     * Listar vídeos do curso (alunos apenas se matriculados)
+     * Listar vídeos do curso
      */
     public function videos(Course $course)
     {
@@ -159,7 +160,10 @@ class CourseController extends Controller
 
         $user->enrolledCourses()->syncWithoutDetaching([$course->id]);
 
-        return response()->json(['message' => 'Enrollment successful', 'course' => $course->title]);
+        return response()->json([
+            'message' => 'Enrollment successful',
+            'course' => $course->title
+        ]);
     }
 
     /**
@@ -169,7 +173,7 @@ class CourseController extends Controller
     {
         $user = User::with('roles')->find(Auth::id());
 
-        if (! $user->enrolledCourses()->where('course_id', $courseId)->exists()) {
+        if (!$user->enrolledCourses()->where('course_id', $courseId)->exists()) {
             return response()->json(['error' => 'Not enrolled'], 403);
         }
 

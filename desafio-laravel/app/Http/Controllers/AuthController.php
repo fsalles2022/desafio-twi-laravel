@@ -4,18 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\RefreshToken;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    // Registro de usuário
     public function register(Request $request)
     {
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:3|confirmed',
-            'role'     => 'required|in:student,teacher,admin', // 🔥 obrigatório
+            'role'     => 'required|in:student,teacher,admin',
         ]);
 
         $user = User::create([
@@ -24,17 +28,19 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // 🔥 atribui o papel ao usuário
         $user->assignRole($request->role);
 
         $token = $user->createToken('api-token')->plainTextToken;
+        $refreshToken = $this->createRefreshToken($user);
 
         return response()->json([
-            'user'  => $user,
-            'token' => $token,
+            'user'          => $user,
+            'token'         => $token,
+            'refresh_token' => $refreshToken->token,
         ], 201);
     }
 
+    // Login
     public function login(Request $request)
     {
         $request->validate([
@@ -50,17 +56,67 @@ class AuthController extends Controller
             ]);
         }
 
+        // Remove refresh tokens antigos
+        RefreshToken::where('user_id', $user->id)->delete();
+
         $token = $user->createToken('api-token')->plainTextToken;
+        $refreshToken = $this->createRefreshToken($user);
 
         return response()->json([
-            'user'  => $user,
-            'token' => $token,
+            'user'          => $user,
+            'token'         => $token,
+            'refresh_token' => $refreshToken->token,
         ]);
     }
 
+    // Logout
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+
+        // Deleta todos refresh tokens do usuário
+        RefreshToken::where('user_id', $request->user()->id)->delete();
+
         return response()->json(['message' => 'Logout realizado com sucesso.']);
+    }
+
+    // Refresh token
+    public function refresh(Request $request)
+    {
+        $request->validate([
+            'refresh_token' => 'required|string',
+        ]);
+
+        $refreshToken = RefreshToken::where('token', $request->refresh_token)->first();
+
+        if (! $refreshToken || $refreshToken->expires_at->isPast()) {
+            return response()->json(['error' => 'Refresh token inválido ou expirado'], 401);
+        }
+
+        $user = $refreshToken->user;
+
+        // Remove refresh token usado e gera novo
+        $refreshToken->delete();
+        $token = $user->createToken('api-token')->plainTextToken;
+        $newRefresh = $this->createRefreshToken($user);
+
+        return response()->json([
+            'user'          => $user,
+            'token'         => $token,
+            'refresh_token' => $newRefresh->token,
+        ]);
+    }
+
+    // Cria refresh token
+    private function createRefreshToken(User $user)
+    {
+        $token = Str::random(60);
+        $expiresAt = Carbon::now()->addDays(7);
+
+        return RefreshToken::create([
+            'user_id'    => $user->id,
+            'token'      => $token,
+            'expires_at' => $expiresAt,
+        ]);
     }
 }

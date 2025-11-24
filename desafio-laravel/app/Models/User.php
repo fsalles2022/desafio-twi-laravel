@@ -16,17 +16,7 @@ class User extends Authenticatable
     protected $hidden = ['password', 'remember_token'];
 
     /**
-     * Relacionamento com vídeos assistidos
-     */
-    public function videos()
-    {
-        return $this->belongsToMany(Video::class, 'video_watched')
-                    ->withPivot('watched')
-                    ->withTimestamps();
-    }
-
-    /**
-     * Todos os cursos do usuário (aluno ou teacher)
+     * Cursos criados ou matriculados do usuário
      */
     public function courses()
     {
@@ -59,6 +49,7 @@ class User extends Authenticatable
     public function watchedVideos()
     {
         return $this->belongsToMany(Video::class, 'video_watched')
+                    ->withPivot('watched')
                     ->withTimestamps();
     }
 }

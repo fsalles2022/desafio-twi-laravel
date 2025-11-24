@@ -47,7 +47,7 @@ class Course extends Model
     }
 
     /**
-     * Scope para cursos ativos
+     * Scope para retornar apenas cursos ativos
      */
     public function scopeActive($query)
     {
