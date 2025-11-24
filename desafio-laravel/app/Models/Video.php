@@ -9,36 +9,39 @@ class Video extends Model
 {
     use HasFactory;
 
-    // Campos que podem ser preenchidos via create/update
     protected $fillable = [
         'course_id',
         'title',
+        'description',
         'filename',
     ];
 
-    /**
-     * Relacionamento com usuários (many-to-many)
-     * Pivot table: user_video
-     * Pivot field: watched
-     */
-    public function users()
-    {
-        return $this->belongsToMany(User::class)
-            ->withPivot('watched')
-            ->withTimestamps();
-    }
-
+    // Relação com o curso
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
+    // Usuários que assistiram este vídeo
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'video_watched')
+                    ->withPivot('watched')
+                    ->withTimestamps();
+    }
 
-    /**
-     * Retorna a URL completa do vídeo via Laravel
-     */
+    // Accessor para URL do arquivo de vídeo
     public function getUrlAttribute()
     {
-        return url("/api/video/{$this->filename}");
+        return $this->filename ? asset('storage/videos/' . $this->filename) : null;
+    }
+
+    // Mime type do vídeo (útil para frontend)
+    public function getMimeTypeAttribute()
+    {
+        $ext = strtolower(pathinfo($this->filename, PATHINFO_EXTENSION));
+        if (in_array($ext, ['mp4', 'mov', 'avi'])) return 'video/mp4';
+        if ($ext === 'mp3') return 'audio/mp3';
+        return 'application/octet-stream';
     }
 }

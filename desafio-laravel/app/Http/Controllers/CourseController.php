@@ -39,8 +39,13 @@ class CourseController extends Controller
         // Students veem cursos disponíveis e matriculados
         if ($user->hasRole('student')) {
             return response()->json([
-                'my_courses'  => $user->studentCourses()->with('teacher')->get(), // cursos matriculados
-                'all_courses' => Course::where('status', 'active')->with('teacher')->get(), // todos cursos ativos
+                'my_courses' => $user->studentCourses()->with('teacher')->get(),
+                'all_courses' => Course::where('status', 'active')
+                    ->whereDoesntHave('students', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    })
+                    ->with('teacher')
+                    ->get(),
             ]);
         }
 
@@ -52,8 +57,8 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        // Carrega vídeos e professor
         $course->load(['videos', 'teacher']);
+        $course->append('course_image_url'); // retorna URL completa da imagem
         return response()->json($course);
     }
 
@@ -71,7 +76,6 @@ class CourseController extends Controller
             'status'       => 'in:active,inactive',
         ]);
 
-        // upload da imagem
         if ($request->hasFile('course_image')) {
             $path = $request->file('course_image')->store('courses', 'public');
             $data['course_image'] = $path;
@@ -90,6 +94,7 @@ class CourseController extends Controller
         $data['user_id'] = Auth::id();
 
         $course = $this->repo->create($data);
+        $course->append('course_image_url');
 
         return response()->json($course, 201);
     }
@@ -118,6 +123,7 @@ class CourseController extends Controller
         }
 
         $course = $this->repo->update($course, $data);
+        $course->append('course_image_url');
 
         return response()->json($course);
     }
@@ -128,7 +134,6 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         $this->authorize('delete', $course);
-
         $this->repo->delete($course);
 
         return response()->json(['message' => 'Course deleted']);
@@ -140,6 +145,8 @@ class CourseController extends Controller
     public function videos(Course $course)
     {
         $user = User::with('roles')->find(Auth::id());
+
+        $course->load('videos');
 
         if ($user->hasRole('teacher')) {
             return response()->json([
@@ -188,7 +195,6 @@ class CourseController extends Controller
     public function watchedVideos($courseId)
     {
         $user = User::with('roles')->find(Auth::id());
-
         $isEnrolled = $user->enrolledCourses()->where('course_id', $courseId)->exists();
         if (! $isEnrolled) {
             return response()->json(['error' => 'Not enrolled'], 403);
