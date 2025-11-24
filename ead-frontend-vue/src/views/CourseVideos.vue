@@ -40,12 +40,22 @@ const fetchCourseVideos = async () => {
       { headers: { Authorization: `Bearer ${auth.token}` } }
     );
 
-    course.value = res.data.course;
-    videos.value = res.data.videos;
+    // Backend retorna SOMENTE a lista de vídeos
+    videos.value = res.data;
+
+    // Se quiser buscar dados do curso, chame a outra API:
+    const courseRes = await axios.get(
+      `http://localhost:8000/api/courses/${route.params.id}`,
+      { headers: { Authorization: `Bearer ${auth.token}` } }
+    );
+
+    course.value = courseRes.data;
+
   } finally {
     loading.value = false;
   }
 };
+
 
 // monta o caminho completo do arquivo vindo do Node
 const formatVideo = (v) => ({

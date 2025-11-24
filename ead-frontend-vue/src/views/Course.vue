@@ -9,21 +9,14 @@
     <div v-else class="row g-4">
       <div class="col-md-4" v-for="c in courses" :key="c.id">
         <div class="card shadow-sm h-100">
-          <img
-            :src="c.course_image || '/default-course.jpg'"
-            class="card-img-top"
-            alt="Course image"
-            style="height: 180px; object-fit: cover"
-          />
+          <img :src="c.course_image || '/default-course.jpg'" class="card-img-top" alt="Course image"
+            style="height: 180px; object-fit: cover" />
 
           <div class="card-body">
             <h5 class="card-title">{{ c.title }}</h5>
             <p class="text-muted">{{ c.description }}</p>
 
-            <router-link
-              :to="`/courses/${c.id}`"
-              class="btn btn-primary w-100"
-            >
+            <router-link :to="`/courses/${c.id}`" class="btn btn-primary w-100">
               Acessar Curso →
             </router-link>
           </div>
@@ -51,13 +44,23 @@ const fetchCourses = async () => {
     const res = await axios.get("http://localhost:8000/api/courses", {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
-    courses.value = res.data;
+
+    // Verifica se é aluno
+    if (res.data.my_courses) {
+      courses.value = res.data.my_courses;
+    }
+    // Se for teacher, backend retorna lista simples
+    else {
+      courses.value = res.data;
+    }
+
   } catch (err) {
     console.error("Erro carregando cursos:", err);
   } finally {
     loading.value = false;
   }
 };
+
 
 onMounted(fetchCourses);
 </script>
