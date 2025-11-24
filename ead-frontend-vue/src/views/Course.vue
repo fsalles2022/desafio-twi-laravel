@@ -9,7 +9,7 @@
     <div v-else class="row g-4">
       <div class="col-md-4" v-for="c in courses" :key="c.id">
         <div class="card shadow-sm h-100">
-          <img :src="c.course_image || '/default-course.jpg'" class="card-img-top" alt="Course image"
+          <img :src="`http://localhost:8000/storage/${c.course_image}`" alt="Curso"
             style="height: 180px; object-fit: cover" />
 
           <div class="card-body">

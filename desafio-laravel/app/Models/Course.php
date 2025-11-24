@@ -14,10 +14,11 @@ class Course extends Model
         'user_id',
         'title',
         'slug',
-        'course_image',
+        'course_image', // <- adicionado
         'description',
         'status',
     ];
+
 
     public function user()
     {
