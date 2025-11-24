@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Videos from '../views/Videos.vue'
-import Profile from '../views/Profile.vue'
 import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
@@ -41,6 +40,12 @@ const router = createRouter({
       name: 'profile',
       component: () => import('../views/Profile.vue'),
       meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/Register.vue'),
     },
 
     // 404

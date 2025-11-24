@@ -7,7 +7,7 @@
       <input v-model="email" type="email" placeholder="E-mail" required />
       <input v-model="password" type="password" placeholder="Senha" required />
       <input v-model="password_confirmation" type="password" placeholder="Confirme a senha" required />
-      <button type="submit">Cadastrarr</button>
+      <button type="submit">Cadastrar</button>
     </form>
 
     <p v-if="error" style="color: red">{{ error }}</p>

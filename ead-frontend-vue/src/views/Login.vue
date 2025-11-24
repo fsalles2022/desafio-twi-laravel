@@ -10,6 +10,11 @@
         <input v-model="password" type="password" placeholder="Senha" required />
         <button type="submit">Entrar</button>
       </form>
+      <div class="text-center mt-3">
+        <small class="text-muted">
+          Não possui uma conta? <RouterLink to="/register">Cadastre-se</RouterLink>
+        </small>
+      </div>
     </div>
   </div>
 </template>
@@ -43,8 +48,7 @@ const login = async () => {
 .background {
   position: absolute;
   inset: 0;
-  background: url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80")
-    center/cover no-repeat fixed;
+  background: url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat fixed;
   z-index: 0;
   filter: brightness(0.6);
   animation: moveBg 20s ease-in-out infinite alternate;
@@ -101,6 +105,7 @@ button:hover {
   from {
     transform: scale(1);
   }
+
   to {
     transform: scale(1.1);
   }
@@ -110,9 +115,11 @@ button:hover {
   0% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
+
   100% {
     transform: translateY(0);
   }
