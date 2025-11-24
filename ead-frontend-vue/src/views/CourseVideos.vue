@@ -1,8 +1,5 @@
 <template>
   <div class="container py-4">
-    <h2 class="mb-3">{{ course?.title }}</h2>
-    <p class="text-muted">{{ course?.description }}</p>
-
     <div v-if="loading" class="text-center">
       <div class="spinner-border text-primary"></div>
     </div>
