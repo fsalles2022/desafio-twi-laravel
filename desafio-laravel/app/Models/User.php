@@ -27,4 +27,15 @@ class User extends Authenticatable
             ->withPivot('progress', 'completed_at')
             ->withTimestamps();
     }
+
+    public function enrolledCourses()
+    {
+        return $this->belongsToMany(Course::class, 'course_user');
+    }
+
+    public function watchedVideos()
+    {
+        return $this->belongsToMany(Video::class, 'video_watched')
+            ->withTimestamps();
+    }
 }

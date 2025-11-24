@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Video;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -87,7 +88,6 @@ class VideoController extends Controller
             $video->url = url("/api/video/{$filename}");
 
             return response()->json($video, 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Erro: ' . $e->getMessage()], 500);
@@ -112,9 +112,84 @@ class VideoController extends Controller
 
             return response($response->body(), $response->status())
                 ->withHeaders($headers);
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'Falha no proxy: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function markAsWatched($videoId)
+    {
+        $user = Auth::user();
+        $user = User::with('roles')->find($user->id);
+
+        // Verifica se o vídeo existe
+        $video = Video::findOrFail($videoId);
+
+        // Verifica se o aluno está inscrito no curso do vídeo
+        $isEnrolled = $user->courses()->where('course_id', $video->course_id)->exists();
+
+        if (! $isEnrolled) {
+            return response()->json([
+                'error' => 'Not enrolled'
+            ], 403);
+        }
+
+        // Verifica se já marcou como assistido (pivot)
+        $alreadyWatched = $user->watchedVideos()
+            ->where('video_id', $videoId)
+            ->exists();
+
+        if ($alreadyWatched) {
+            return response()->json([
+                'message' => 'Already watched',
+                'video_id' => $videoId
+            ]);
+        }
+
+        // Marca como assistido
+        $user->watchedVideos()->attach($videoId);
+
+        return response()->json([
+            'message' => 'Video marked as watched',
+            'video_id' => $videoId
+        ]);
+    }
+
+    public function unmarkAsWatched($videoId)
+    {
+        $user = Auth::user();
+        $user = User::with('roles')->find($user->id);
+
+        // Verifica se o vídeo existe
+        $video = Video::findOrFail($videoId);
+
+        // Verifica se o aluno está inscrito no curso
+        $isEnrolled = $user->courses()->where('course_id', $video->course_id)->exists();
+
+        if (! $isEnrolled) {
+            return response()->json([
+                'error' => 'Not enrolled'
+            ], 403);
+        }
+
+        // Verifica se existe o registro no pivot
+        $alreadyWatched = $user->watchedVideos()
+            ->where('video_id', $videoId)
+            ->exists();
+
+        if (! $alreadyWatched) {
+            return response()->json([
+                'message' => 'Not marked as watched',
+                'video_id' => $videoId
+            ]);
+        }
+
+        // Remove do pivot
+        $user->watchedVideos()->detach($videoId);
+
+        return response()->json([
+            'message' => 'Video unmarked as watched',
+            'video_id' => $videoId
+        ]);
     }
 }

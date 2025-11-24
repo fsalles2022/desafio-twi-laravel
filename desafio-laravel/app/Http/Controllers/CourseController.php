@@ -78,7 +78,7 @@ class CourseController extends Controller
         }
 
         $data['slug'] = $slug;
-        $data['user_id'] = auth()->id();
+        $data['user_id'] = Auth::id();
 
         $course = $this->repo->create($data);
 
@@ -125,39 +125,111 @@ class CourseController extends Controller
      */
     public function videos(Course $course)
     {
-        $course->load('videos');
+        $user = Auth::user();
+        $user = User::with('roles')->find($user->id);
 
-        return response()->json([
-            'course' => $course,
-            'videos' => $course->videos
-        ]);
+        if ($user->hasRole('teacher')) {
+            return $course->videos;
+        }
+
+        // 🔐 aluno só vê vídeos se estiver matriculado
+        if (! $user->enrolledCourses->contains($course->id)) {
+            return response()->json(['error' => 'Not enrolled'], 403);
+        }
+
+        return $course->videos;
     }
 
     /**
      * Matricular aluno em curso
      */
-    public function enroll(Request $request, $courseId)
+    // public function enroll(Request $request, $courseId)
+    // {
+    //     $request->validate([
+    //         'user_id' => 'required|exists:users,id',
+    //     ]);
+
+    //     $course = Course::findOrFail($courseId);
+
+    //     if ($course->students()->where('user_id', $request->user_id)->exists()) {
+    //         return response()->json([
+    //             'message' => 'Aluno já matriculado.'
+    //         ], 409);
+    //     }
+
+    //     $course->students()->attach($request->user_id, [
+    //         'progress' => 0,
+    //         'completed_at' => null,
+    //     ]);
+
+    //     return response()->json([
+    //         'message' => 'Aluno matriculado com sucesso.',
+    //         'course'  => $course
+    //     ], 201);
+    // }
+
+    public function selfEnroll(Course $course)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
 
-        $course = Course::findOrFail($courseId);
+        $user = Auth::user();
+        $user = User::with('roles')->find($user->id);
 
-        if ($course->students()->where('user_id', $request->user_id)->exists()) {
-            return response()->json([
-                'message' => 'Aluno já matriculado.'
-            ], 409);
+        // Se quiser impedir o teacher de se matricular
+        if ($user->hasRole('teacher')) {
+            return response()->json(['message' => 'Teachers cannot enroll'], 403);
         }
 
-        $course->students()->attach($request->user_id, [
-            'progress' => 0,
-            'completed_at' => null,
-        ]);
+        // Impede matrícula duplicada
+        if ($user->enrolledCourses()->where('course_id', $course->id)->exists()) {
+            return response()->json(['message' => 'You are already enrolled'], 200);
+        }
+
+        // Matricula o aluno
+        $user->enrolledCourses()->syncWithoutDetaching([$course->id]);
 
         return response()->json([
-            'message' => 'Aluno matriculado com sucesso.',
-            'course'  => $course
-        ], 201);
+            'message' => 'Enrollment successful',
+            'course' => $course->title,
+        ]);
+    }
+
+    public function watchedVideos($courseId)
+    {
+        $user = Auth::user();
+        $user = User::with('roles')->find($user->id);
+
+        // 1. Curso existe?
+        $course = Course::findOrFail($courseId);
+
+        // 2. Usuário está matriculado?
+        $isEnrolled = $user->courses()
+            ->where('course_id', $courseId)
+            ->exists();
+
+        if (! $isEnrolled) {
+            return response()->json([
+                'error' => 'Not enrolled'
+            ], 403);
+        }
+
+        // 3. Buscar vídeos assistidos desse curso
+        $watched = $user->watchedVideos()
+            ->where('course_id', $courseId)
+            ->get()
+            ->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'title' => $v->title,
+                    'description' => $v->description,
+                    'filename' => $v->filename,
+                    'watched_at' => $v->pivot->created_at,
+                ];
+            });
+
+        return response()->json([
+            'course_id' => $courseId,
+            'watched_count' => $watched->count(),
+            'videos' => $watched
+        ]);
     }
 }
