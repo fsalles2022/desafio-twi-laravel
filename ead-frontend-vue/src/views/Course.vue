@@ -15,7 +15,7 @@
           <div class="card-body">
             <h5 class="card-title">{{ c.title }}</h5>
             <p class="text-muted">{{ c.description }}</p>
-            <router-link :to="`/courses/${c.id}`" class="btn btn-primary w-100">
+            <router-link :to="`/course/${c.id}`" class="btn btn-primary w-100">
               Acessar Curso →
             </router-link>
           </div>
