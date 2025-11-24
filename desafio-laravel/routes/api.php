@@ -125,4 +125,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         return response()->json(array_values($videos));
     });
+
+    // routes/api.php
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/profile', [UserController::class, 'profile']);
+        Route::put('/profile', [UserController::class, 'updateProfile']);
+    });
 });

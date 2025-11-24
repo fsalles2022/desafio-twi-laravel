@@ -31,13 +31,23 @@ const auth = useAuthStore()
             <li class="nav-item"><RouterLink to="/sobre" class="nav-link text-white fw-semibold">Sobre</RouterLink></li>
             <li class="nav-item"><RouterLink to="/contato" class="nav-link text-white fw-semibold">Contato</RouterLink></li>
 
-            <li class="nav-item" v-if="auth.user">
-              <span class="text-white me-2">
+            <!-- Se o usuário estiver logado -->
+            <li class="nav-item dropdown" v-if="auth.user">
+              <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                 Olá, <strong>{{ auth.user.name }}</strong>!
-              </span>
-              <button @click="auth.logout" class="btn btn-danger btn-sm">Sair</button>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li>
+                  <RouterLink to="/profile" class="dropdown-item">Meu Perfil</RouterLink>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <button @click="auth.logout" class="dropdown-item text-danger">Sair</button>
+                </li>
+              </ul>
             </li>
 
+            <!-- Se não estiver logado -->
             <li class="nav-item" v-else>
               <RouterLink to="/login" class="btn btn-outline-light btn-sm px-3 fw-semibold">
                 Entrar
@@ -52,7 +62,7 @@ const auth = useAuthStore()
     <!-- Conteúdo -->
     <main class="flex-grow-1 py-5">
       <div class="container">
-        <slot />
+        <RouterView />
       </div>
     </main>
 
