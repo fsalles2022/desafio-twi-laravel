@@ -15,7 +15,9 @@ class User extends Authenticatable
     protected $fillable = ['name', 'email', 'password', 'image'];
     protected $hidden = ['password', 'remember_token'];
 
-    // Relacionamento com vídeos assistidos
+    /**
+     * Relacionamento com vídeos assistidos
+     */
     public function videos()
     {
         return $this->belongsToMany(Video::class, 'video_watched')
@@ -23,7 +25,9 @@ class User extends Authenticatable
                     ->withTimestamps();
     }
 
-    // Todos os cursos do usuário (aluno ou teacher)
+    /**
+     * Todos os cursos do usuário (aluno ou teacher)
+     */
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'course_user')
@@ -31,7 +35,9 @@ class User extends Authenticatable
                     ->withTimestamps();
     }
 
-    // Cursos matriculados do aluno
+    /**
+     * Cursos matriculados do aluno
+     */
     public function enrolledCourses()
     {
         return $this->belongsToMany(Course::class, 'course_user', 'user_id', 'course_id')
@@ -39,13 +45,17 @@ class User extends Authenticatable
                     ->withTimestamps();
     }
 
-    // Alias para facilitar leitura no controller
+    /**
+     * Alias para facilitar leitura no controller
+     */
     public function studentCourses()
     {
         return $this->enrolledCourses();
     }
 
-    // Vídeos assistidos pelo usuário
+    /**
+     * Vídeos assistidos pelo usuário
+     */
     public function watchedVideos()
     {
         return $this->belongsToMany(Video::class, 'video_watched')

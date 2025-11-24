@@ -20,22 +20,25 @@ class Course extends Model
         'status',
     ];
 
-    // Adiciona automaticamente o accessor course_image_url ao serializar
-    protected $appends = ['course_image_url'];
-
-    // Relação com o professor que criou o curso
+    /**
+     * Professor que criou o curso
+     */
     public function teacher()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Todos os vídeos do curso
+    /**
+     * Todos os vídeos do curso
+     */
     public function videos()
     {
         return $this->hasMany(Video::class);
     }
 
-    // Alunos matriculados no curso
+    /**
+     * Alunos matriculados no curso
+     */
     public function students()
     {
         return $this->belongsToMany(User::class, 'course_user')
@@ -43,13 +46,17 @@ class Course extends Model
                     ->withTimestamps();
     }
 
-    // Scope para cursos ativos
+    /**
+     * Scope para cursos ativos
+     */
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
     }
 
-    // Retorna URL completa da imagem do curso
+    /**
+     * Retorna URL completa da imagem do curso
+     */
     public function getCourseImageUrlAttribute()
     {
         return $this->course_image ? asset('storage/' . $this->course_image) : null;

@@ -28,24 +28,17 @@ class CourseController extends Controller
     {
         $user = User::with('roles')->find(Auth::id());
 
-        // Teachers veem cursos criados por eles
         if ($user->hasRole('teacher')) {
             return response()->json([
                 'my_courses'  => $this->repo->allForUser($user->id),
-                'all_courses' => Course::where('status', 'active')->with('teacher')->get(),
+                'all_courses' => Course::active()->with('teacher')->get(),
             ]);
         }
 
-        // Students veem cursos disponíveis e matriculados
         if ($user->hasRole('student')) {
             return response()->json([
-                'my_courses' => $user->studentCourses()->with('teacher')->get(),
-                'all_courses' => Course::where('status', 'active')
-                    ->whereDoesntHave('students', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    })
-                    ->with('teacher')
-                    ->get(),
+                'my_courses'  => $user->studentCourses()->with('teacher')->get(),
+                'all_courses' => Course::active()->with('teacher')->get(),
             ]);
         }
 
@@ -53,12 +46,11 @@ class CourseController extends Controller
     }
 
     /**
-     * Mostrar 1 curso com relacionamento básico
+     * Mostrar 1 curso com vídeos e professor
      */
     public function show(Course $course)
     {
         $course->load(['videos', 'teacher']);
-        $course->append('course_image_url'); // retorna URL completa da imagem
         return response()->json($course);
     }
 
@@ -77,16 +69,13 @@ class CourseController extends Controller
         ]);
 
         if ($request->hasFile('course_image')) {
-            $path = $request->file('course_image')->store('courses', 'public');
-            $data['course_image'] = $path;
+            $data['course_image'] = $request->file('course_image')->store('courses', 'public');
         }
 
-        // gerar slug único
-        $baseSlug = Str::slug($data['title']);
-        $slug = $baseSlug;
+        $slug = Str::slug($data['title']);
         $counter = 1;
         while (Course::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
+            $slug = Str::slug($data['title']) . '-' . $counter;
             $counter++;
         }
 
@@ -94,13 +83,12 @@ class CourseController extends Controller
         $data['user_id'] = Auth::id();
 
         $course = $this->repo->create($data);
-        $course->append('course_image_url');
 
         return response()->json($course, 201);
     }
 
     /**
-     * Atualizar curso (somente TEACHER dono do curso)
+     * Atualizar curso (somente TEACHER dono)
      */
     public function update(Request $request, Course $course)
     {
@@ -114,8 +102,7 @@ class CourseController extends Controller
         ]);
 
         if ($request->hasFile('course_image')) {
-            $path = $request->file('course_image')->store('courses', 'public');
-            $data['course_image'] = $path;
+            $data['course_image'] = $request->file('course_image')->store('courses', 'public');
         }
 
         if (isset($data['title'])) {
@@ -123,13 +110,12 @@ class CourseController extends Controller
         }
 
         $course = $this->repo->update($course, $data);
-        $course->append('course_image_url');
 
         return response()->json($course);
     }
 
     /**
-     * Deletar curso (somente TEACHER dono)
+     * Deletar curso
      */
     public function destroy(Course $course)
     {
@@ -140,34 +126,24 @@ class CourseController extends Controller
     }
 
     /**
-     * Trazer os vídeos do curso
+     * Listar vídeos do curso (alunos apenas se matriculados)
      */
     public function videos(Course $course)
     {
         $user = User::with('roles')->find(Auth::id());
 
-        $course->load('videos');
-
-        if ($user->hasRole('teacher')) {
+        if ($user->hasRole('teacher') || $user->enrolledCourses->contains($course->id)) {
             return response()->json([
                 'course' => $course,
                 'videos' => $course->videos
             ]);
         }
 
-        // aluno só vê vídeos se estiver matriculado
-        if (! $user->enrolledCourses->contains($course->id)) {
-            return response()->json(['error' => 'Not enrolled'], 403);
-        }
-
-        return response()->json([
-            'course' => $course,
-            'videos' => $course->videos
-        ]);
+        return response()->json(['error' => 'Not enrolled'], 403);
     }
 
     /**
-     * Matricular aluno em curso
+     * Matricular aluno
      */
     public function selfEnroll(Course $course)
     {
@@ -178,38 +154,35 @@ class CourseController extends Controller
         }
 
         if ($user->enrolledCourses()->where('course_id', $course->id)->exists()) {
-            return response()->json(['message' => 'You are already enrolled'], 200);
+            return response()->json(['message' => 'Already enrolled'], 200);
         }
 
         $user->enrolledCourses()->syncWithoutDetaching([$course->id]);
 
-        return response()->json([
-            'message' => 'Enrollment successful',
-            'course' => $course->title,
-        ]);
+        return response()->json(['message' => 'Enrollment successful', 'course' => $course->title]);
     }
 
     /**
-     * Videos assistidos do usuário
+     * Vídeos assistidos do usuário
      */
     public function watchedVideos($courseId)
     {
         $user = User::with('roles')->find(Auth::id());
-        $isEnrolled = $user->enrolledCourses()->where('course_id', $courseId)->exists();
-        if (! $isEnrolled) {
+
+        if (! $user->enrolledCourses()->where('course_id', $courseId)->exists()) {
             return response()->json(['error' => 'Not enrolled'], 403);
         }
 
         $watched = $user->watchedVideos()
-            ->where('course_id', $courseId)
-            ->get()
-            ->map(fn($v) => [
-                'id' => $v->id,
-                'title' => $v->title,
-                'description' => $v->description,
-                'filename' => $v->filename,
-                'watched_at' => $v->pivot->created_at,
-            ]);
+                        ->where('course_id', $courseId)
+                        ->get()
+                        ->map(fn($v) => [
+                            'id' => $v->id,
+                            'title' => $v->title,
+                            'description' => $v->description,
+                            'filename' => $v->filename,
+                            'watched_at' => $v->pivot->created_at,
+                        ]);
 
         return response()->json([
             'course_id' => $courseId,
