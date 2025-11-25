@@ -19,18 +19,30 @@ class AuthController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:3|confirmed',
-            // 'role'     => 'required|in:student,teacher,admin',
+            'image'    => 'nullable|image|max:2048',
         ]);
-        $role = "student"; // Definindo o papel padrão como 'student'
 
+        // Define a role padrão
+        $role = 'student';
+
+        // Salva imagem se enviada
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('users', 'public');
+        }
+
+        // Cria o usuário
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'image'    => $imagePath,
         ]);
 
-        $user->assignRole($request->role);
+        // Atribui role padrão
+        $user->assignRole($role);
 
+        // Tokens
         $token = $user->createToken('api-token')->plainTextToken;
         $refreshToken = $this->createRefreshToken($user);
 
@@ -40,6 +52,7 @@ class AuthController extends Controller
             'refresh_token' => $refreshToken->token,
         ], 201);
     }
+
 
     // Login
     public function login(Request $request)

@@ -60,4 +60,11 @@ class User extends Authenticatable
             ->withPivot('watched')
             ->withTimestamps();
     }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image
+            ? asset('storage/' . $this->image)
+            : asset('default-avatar.png');
+    }
 }
