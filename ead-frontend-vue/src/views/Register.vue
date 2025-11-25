@@ -1,60 +1,75 @@
 <template>
-  <div style="max-width: 400px; margin: 50px auto;">
-    <h2>Cadastro</h2>
+  <div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div class="card p-4 shadow-sm" style="width: 400px;">
+      <h3 class="mb-3 text-center">Criar Conta</h3>
+      <form @submit.prevent="register">
 
-    <form @submit.prevent="register">
-      <input v-model="name" type="text" placeholder="Nome" required />
-      <input v-model="email" type="email" placeholder="E-mail" required />
-      <input v-model="password" type="password" placeholder="Senha" required />
-      <input v-model="password_confirmation" type="password" placeholder="Confirme a senha" required />
-      <button type="submit">Cadastrar</button>
-    </form>
+        <div class="mb-3">
+          <label for="name" class="form-label">Nome</label>
+          <input v-model="form.name" type="text" class="form-control" id="name" required />
+        </div>
 
-    <p v-if="error" style="color: red">{{ error }}</p>
-    <p v-if="success" style="color: green">{{ success }}</p>
+        <div class="mb-3">
+          <label for="email" class="form-label">E-mail</label>
+          <input v-model="form.email" type="email" class="form-control" id="email" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Senha</label>
+          <input v-model="form.password" type="password" class="form-control" id="password" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="password_confirmation" class="form-label">Confirme a Senha</label>
+          <input v-model="form.password_confirmation" type="password" class="form-control" id="password_confirmation" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Registrar</button>
+
+        <p class="text-center mt-3">
+          Já tem uma conta?
+          <RouterLink to="/login">Entrar</RouterLink>
+        </p>
+      </form>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { reactive } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 
-const auth = useAuthStore()
+const router = useRouter()
 
-const name = ref('')
-const email = ref('')
-const password = ref('')
-const password_confirmation = ref('')
-
-const error = ref('')
-const success = ref('')
+const form = reactive({
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: ''
+})
 
 const register = async () => {
-  error.value = ''
-  success.value = ''
   try {
-    await auth.register({
-      name: name.value,
-      email: email.value,
-      password: password.value,
-      password_confirmation: password_confirmation.value
-    })
-    success.value = 'Cadastro realizado com sucesso! Faça login.'
-    name.value = ""
-    email.value = ""
-    password.value = ""
-    password_confirmation.value = ""
+    // envia para a rota do Laravel
+    await axios.post('http://localhost:8000/api/auth/register', form)
+    alert('Conta criada com sucesso! Você será redirecionado para o login.')
+    router.push('/login')
   } catch (err) {
-    error.value = err.response?.data?.message || 'Erro no cadastro.'
+    console.error(err)
+    if (err.response && err.response.data.errors) {
+      // mostra mensagens de validação do Laravel
+      const messages = Object.values(err.response.data.errors).flat()
+      alert(messages.join('\n'))
+    } else {
+      alert('Erro ao registrar. Verifique os dados.')
+    }
   }
 }
 </script>
 
 <style scoped>
-input, button {
-  display: block;
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
+body {
+  margin: 0;
 }
 </style>
