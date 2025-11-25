@@ -12,7 +12,6 @@ use App\Http\Controllers\UserController;
 | AUTH
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -40,6 +39,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE (todos usuários logados)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::put('/profile', [UserController::class, 'updateProfile']);
 
     /*
     |--------------------------------------------------------------------------
@@ -124,11 +131,5 @@ Route::middleware('auth:sanctum')->group(function () {
         );
 
         return response()->json(array_values($videos));
-    });
-
-    // routes/api.php
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/profile', [UserController::class, 'profile']);
-        Route::put('/profile', [UserController::class, 'updateProfile']);
     });
 });
