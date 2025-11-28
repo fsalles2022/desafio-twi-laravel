@@ -95,26 +95,7 @@ class UserController extends Controller
         return response()->json($request->user());
     }
 
-    // Atualiza dados do usuário
-    // public function updateProfile(Request $request)
-    // {
-
-    //     $user = $request->user();
-    //     $data = $request->validate([
-    //         'name'  => 'sometimes|string|max:255',
-    //         'email' => 'sometimes|email|unique:users,email,' . $request->user()->id,
-    //         'image' => 'nullable|image|max:2048',
-    //     ]);
-
-    //     if ($request->hasFile('image')) {
-    //         $path = $request->file('image')->store('users', 'public');
-    //         $data['image'] = $path;
-    //     }
-
-    //     $user->update($data);
-
-    //     return response()->json($user);
-    // }
+    // Atualiza dados do usuário logado
     public function updateProfile(Request $request)
     {
         $user = $request->user();
@@ -123,7 +104,7 @@ class UserController extends Controller
             'name' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => 'sometimes|nullable|string|min:6',
-            'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {

@@ -36,7 +36,6 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::get('/profile', [UserController::class, 'profile']);
     Route::post('/profile', [UserController::class, 'updateProfile']);
-
     /*
     |--------------------------------------------------------------------------
     | USERS (somente teacher)
