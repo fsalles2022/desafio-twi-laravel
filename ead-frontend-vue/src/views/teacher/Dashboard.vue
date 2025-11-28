@@ -97,7 +97,7 @@ onMounted(() => {
     <div v-else>
 
       <!-- Título -->
-      <h2 class="fw-bold mb-4">📊 Dashboard do Professor</h2>
+      <h2 class="fw-bold mb-4">📊 Dashboard do Professor: {{ auth.user.name }}</h2>
 
       <!-- CARDS -->
       <div class="row g-4 mb-5">
