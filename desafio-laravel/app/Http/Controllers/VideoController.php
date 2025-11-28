@@ -23,15 +23,22 @@ class VideoController extends Controller
     }
 
     // Listar vídeos do usuário logado
+
     public function userVideos()
     {
         $user = Auth::user();
 
-        return $user->videos->map(function ($v) {
-            $v->url = url("/api/video/{$v->filename}");
-            return $v;
-        });
+        $videos = Video::where('user_id', $user->id)
+            ->with('course')
+            ->get()
+            ->map(function ($v) {
+                $v->url = url("/api/video/{$v->filename}");
+                return $v;
+            });
+
+        return response()->json($videos);
     }
+
 
     // Cadastrar vídeo
     public function store(Request $request)
@@ -92,6 +99,14 @@ class VideoController extends Controller
             DB::rollBack();
             return response()->json(['error' => 'Erro: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function destroy($id)
+    {
+        $video = Video::findOrFail($id);
+        $video->delete();
+
+        return response()->json(['message' => 'Vídeo deletado']);
     }
 
     // Streaming proxy
@@ -191,10 +206,5 @@ class VideoController extends Controller
             'message' => 'Video unmarked as watched',
             'video_id' => $videoId
         ]);
-    }
-
-    public function teacherVideos()
-    {
-        return Video::where('user_id', Auth::id())->get();
     }
 }

@@ -97,10 +97,6 @@ Route::middleware('auth:sanctum')->group(function () {
             // Route::get('videos/teacher', [VideoController::class, 'teacherVideos']);
         });
 
-        Route::middleware('role:teacher|admin')->get('/teacher', [VideoController::class, 'teacherVideos']);
-
-
-
         // Student marca e desmarca assistido
         Route::post('/{id}/watched', [VideoController::class, 'markAsWatched'])
             ->middleware('role:student');

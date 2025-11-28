@@ -1,144 +1,187 @@
 <script setup>
-import { ref, onMounted } from "vue"
-import axios from "axios"
-import { useAuthStore } from "../../stores/auth"
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { useAuthStore } from "../../stores/auth";
+// import Chart from "chart.js/auto";
 
-const auth = useAuthStore()
+const auth = useAuthStore();
 
-const stats = ref({
-  courses: 0,
-  videos: 0,
-  students: 0,
-})
+const loading = ref(true);
+const courses = ref([]);
+const videos = ref([]);
+const studentsCount = ref(0);
 
-const latestVideos = ref([])
+const chartCanvas = ref(null);
 
-onMounted(async () => {
-  await fetchDashboard()
-})
+async function loadDashboard() {
+  loading.value = true;
 
-const fetchDashboard = async () => {
   try {
-    const token = auth.token
+    // 1️⃣ Buscar cursos
+    const coursesResponse = await axios.get("http://localhost:8000/api/courses", {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
 
-    // Buscar estatísticas
-    const s = await axios.get("http://localhost:8000/api/teacher/stats", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    // Para student o backend retorna my_courses
+    if (coursesResponse.data.my_courses) {
+      courses.value = coursesResponse.data.my_courses;
+    } else {
+      courses.value = coursesResponse.data;
+    }
 
-    stats.value = s.data
+    // Filtra APENAS os cursos do professor logado
+    courses.value = courses.value.filter(c => c.user_id === auth.user.id);
 
-    // Buscar últimos vídeos
-    const v = await axios.get("http://localhost:8000/api/videos/user", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    // 2️⃣ Buscar vídeos do professor
+    const videosResponse = await axios.get("http://localhost:8000/api/videos/user", {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+    
 
-    latestVideos.value = v.data.slice(0, 5) // últimos 5
-  } catch (e) {
-    console.error("Erro carregando dashboard:", e)
+    videos.value = videosResponse.data;
+
+    // 3️⃣ Contar alunos dos cursos do professor
+    studentsCount.value = courses.value.reduce((acc, course) => {
+      return acc + (course.students?.length || 0);
+    }, 0);
+
+    // 4️⃣ Criar gráfico (se quiser)
+    // createChart();
+
+  } catch (error) {
+    console.error("Erro ao carregar dashboard:", error);
+  } finally {
+    loading.value = false;
   }
 }
+
+
+function createChart() {
+  if (!chartCanvas.value) return;
+
+  new Chart(chartCanvas.value, {
+    type: "bar",
+    data: {
+      labels: ["Cursos", "Vídeos"],
+      datasets: [
+        {
+          label: "Quantidade",
+          data: [courses.value.length, videos.value.length]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+onMounted(() => {
+  loadDashboard();
+});
 </script>
 
 <template>
-  <div>
+  <div class="container">
 
-    <!-- TÍTULO -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-      <h2 class="fw-bold text-success">Painel do Professor</h2>
+    <!-- LOADING -->
+    <div v-if="loading" class="text-center py-5">
+      <div class="spinner-border text-success"></div>
+      <p class="mt-3">Carregando Dashboard...</p>
     </div>
 
-    <!-- CARDS -->
-    <div class="row g-4 mb-5">
+    <!-- DASHBOARD -->
+    <div v-else>
 
-      <!-- Cursos -->
-      <div class="col-md-4">
-        <div class="card shadow-sm rounded-4 border-0">
-          <div class="card-body d-flex align-items-center">
-            <div class="icon-box bg-success bg-opacity-25 text-success rounded-4 me-3 p-3 fs-3">
-              <i class="bi bi-journal-bookmark"></i>
-            </div>
-            <div>
-              <h6 class="text-secondary mb-0">Cursos</h6>
-              <h3 class="fw-bold">{{ stats.courses }}</h3>
-            </div>
+      <!-- Título -->
+      <h2 class="fw-bold mb-4">📊 Dashboard do Professor</h2>
+
+      <!-- CARDS -->
+      <div class="row g-4 mb-5">
+
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 p-3 bg-success text-white rounded-4">
+            <h5 class="fw-bold">Cursos Criados</h5>
+            <h2 class="fw-bold">{{ courses.length }}</h2>
           </div>
         </div>
-      </div>
 
-      <!-- Vídeos -->
-      <div class="col-md-4">
-        <div class="card shadow-sm rounded-4 border-0">
-          <div class="card-body d-flex align-items-center">
-            <div class="icon-box bg-primary bg-opacity-25 text-primary rounded-4 me-3 p-3 fs-3">
-              <i class="bi bi-camera-video-fill"></i>
-            </div>
-            <div>
-              <h6 class="text-secondary mb-0">Vídeos</h6>
-              <h3 class="fw-bold">{{ stats.videos }}</h3>
-            </div>
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 p-3 bg-primary text-white rounded-4">
+            <h5 class="fw-bold">Vídeos Enviados</h5>
+            <h2 class="fw-bold">{{ videos.length }}</h2>
           </div>
         </div>
-      </div>
 
-      <!-- Alunos -->
-      <div class="col-md-4">
-        <div class="card shadow-sm rounded-4 border-0">
-          <div class="card-body d-flex align-items-center">
-            <div class="icon-box bg-warning bg-opacity-25 text-warning rounded-4 me-3 p-3 fs-3">
-              <i class="bi bi-people-fill"></i>
-            </div>
-            <div>
-              <h6 class="text-secondary mb-0">Alunos</h6>
-              <h3 class="fw-bold">{{ stats.students }}</h3>
-            </div>
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 p-3 bg-dark text-white rounded-4">
+            <h5 class="fw-bold">Total de Alunos</h5>
+            <h2 class="fw-bold">{{ studentsCount }}</h2>
           </div>
         </div>
+
       </div>
 
-    </div>
-
-    <!-- ÚLTIMOS VÍDEOS -->
-    <div class="card shadow-sm rounded-4 border-0">
-      <div class="card-header bg-white py-3">
-        <h5 class="fw-bold mb-0">🎬 Últimos vídeos enviados</h5>
+      <!-- GRÁFICO -->
+      <div class="card shadow-sm border-0 mb-5 p-4 rounded-4">
+        <h4 class="fw-bold mb-3">Atividade Geral</h4>
+        <canvas ref="chartCanvas" height="120"></canvas>
       </div>
 
-      <div class="card-body">
-        <table class="table align-middle">
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>Curso</th>
-              <th>Criado em</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="v in latestVideos" :key="v.id">
-              <td>{{ v.title }}</td>
-              <td>{{ v.course?.title || "Sem curso" }}</td>
-              <td>{{ new Date(v.created_at).toLocaleDateString() }}</td>
-            </tr>
+      <div class="row">
 
-            <tr v-if="latestVideos.length === 0">
-              <td colspan="3" class="text-center text-muted py-4">
-                Nenhum vídeo encontrado.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- ÚLTIMOS CURSOS -->
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+            <h4 class="fw-bold mb-3">📚 Últimos Cursos</h4>
+
+            <div v-if="courses.length === 0">
+              <p class="text-muted">Nenhum curso criado ainda.</p>
+            </div>
+
+            <ul class="list-group">
+              <li v-for="course in courses.slice(0, 5)" :key="course.id"
+                class="list-group-item d-flex justify-content-between">
+                <span>{{ course.title }}</span>
+                <span class="badge bg-success">{{ course.students?.length || 0 }} alunos</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ÚLTIMOS VÍDEOS -->
+        <div class="col-md-6 mb-4">
+          <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+            <h4 class="fw-bold mb-3">🎬 Últimos Vídeos</h4>
+
+            <div v-if="videos.length === 0">
+              <p class="text-muted">Nenhum vídeo enviado ainda.</p>
+            </div>
+
+            <ul class="list-group">
+              <li v-for="video in videos.slice(0, 5)" :key="video.id" class="list-group-item">
+                {{ video.title }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
       </div>
+
     </div>
 
   </div>
 </template>
 
 <style scoped>
-.icon-box {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.card {
+  transition: 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
 }
 </style>
