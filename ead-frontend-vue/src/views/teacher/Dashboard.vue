@@ -36,7 +36,11 @@ async function loadDashboard() {
     const videosResponse = await axios.get("http://localhost:8000/api/videos/user", {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
-    
+
+    const courseUser = await axios.get("http://localhost:8000/api/courses/user", {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+
 
     videos.value = videosResponse.data;
 

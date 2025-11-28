@@ -13,6 +13,7 @@ class CourseRepository
     {
         return Course::where('user_id', $userId)
             ->withCount('videos')
+            ->with('students')
             ->orderBy('id', 'desc')
             ->get();
     }
