@@ -31,6 +31,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | PROFILE (todos usuários logados)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::post('/profile', [UserController::class, 'updateProfile']);
+
+    /*
+    |--------------------------------------------------------------------------
     | USERS (somente teacher)
     |--------------------------------------------------------------------------
     */
@@ -38,17 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::get('/{id}', [UserController::class, 'show']);
-        Route::put('/{id}', [UserController::class, 'update']);
+        Route::post('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
     });
-
-    /*
-    |--------------------------------------------------------------------------
-    | PROFILE (todos usuários logados)
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/profile', [UserController::class, 'profile']);
-    Route::put('/profile', [UserController::class, 'updateProfile']);
 
     /*
     |--------------------------------------------------------------------------
