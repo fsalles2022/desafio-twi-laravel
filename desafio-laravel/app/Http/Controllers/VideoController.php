@@ -101,6 +101,26 @@ class VideoController extends Controller
         }
     }
 
+    public function update(Request $request, $id)
+    {
+        $video = Video::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'course_id' => 'required|exists:courses,id',
+        ]);
+
+        // Atualiza os metadados
+        $video->update($validated);
+
+        return response()->json([
+            'message' => 'Vídeo atualizado com sucesso!',
+            'video' => $video
+        ]);
+    }
+
+
+
     public function destroy($id)
     {
         $video = Video::findOrFail($id);
