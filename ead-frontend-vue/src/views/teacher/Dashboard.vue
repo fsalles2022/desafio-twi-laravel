@@ -33,11 +33,7 @@ async function loadDashboard() {
     courses.value = courses.value.filter(c => c.user_id === auth.user.id);
 
     // 2️⃣ Buscar vídeos do professor
-    const videosResponse = await axios.get("http://localhost:8000/api/videos/user", {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    });
-
-    const courseUser = await axios.get("http://localhost:8000/api/courses/user", {
+    const videosResponse = await axios.get("http://localhost:8000/api/videos", {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
 
