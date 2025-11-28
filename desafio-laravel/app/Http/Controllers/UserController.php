@@ -25,7 +25,15 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::with('videos')->findOrFail($id);
-        return response()->json($user);
+        // return response()->json($user);
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'image' => $user->image,
+            'image_url' => $user->image_url,
+            'roles' => $user->getRoleNames(), // 👈 AQUI TAMBÉM
+        ]);
     }
 
     /**

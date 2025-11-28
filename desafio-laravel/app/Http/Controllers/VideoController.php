@@ -192,4 +192,9 @@ class VideoController extends Controller
             'video_id' => $videoId
         ]);
     }
+
+    public function teacherVideos()
+    {
+        return Video::where('user_id', Auth::id())->get();
+    }
 }

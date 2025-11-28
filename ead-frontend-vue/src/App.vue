@@ -4,6 +4,7 @@ import { RouterView } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 
 // layouts
+import AdminLayout from './components/AdminLayout.vue'
 import TeacherLayout from './components/TeacherLayout.vue'
 import StudentLayout from './components/StudentLayout.vue'
 
@@ -11,19 +12,24 @@ const auth = useAuthStore()
 const loading = ref(true)
 
 onMounted(async () => {
-  await auth.fetchUser()
-  loading.value = false
+  try {
+    await auth.fetchUser()
+  } finally {
+    loading.value = false
+  }
 })
 
-// escolhe qual layout usar
 const layoutComponent = computed(() => {
-  if (loading.value) return null // enquanto carrega, não renderiza nada
+  if (loading.value) return null
 
-  if (!auth.user) return StudentLayout // não logado = layout de aluno
+  const user = auth.user
+  if (!user) return StudentLayout
 
-  return auth.user.roles?.includes('teacher')
-    ? TeacherLayout
-    : StudentLayout
+  const roles = user.roles || []
+
+  if (roles.includes('admin')) return AdminLayout
+  if (roles.includes('teacher')) return TeacherLayout
+  return StudentLayout
 })
 </script>
 

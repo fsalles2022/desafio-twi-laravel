@@ -77,9 +77,16 @@ class AuthController extends Controller
         $refreshToken = $this->createRefreshToken($user);
 
         return response()->json([
-            'user'          => $user,
-            'token'         => $token,
-            'refresh_token' => $refreshToken->token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'image' => $user->image,
+                'image_url' => $user->image_url,
+                'roles' => $user->getRoleNames(), // 👈 AQUI O OURO
+            ],
+            'token' => $token,
+            'refresh_token' => $refreshToken,
         ]);
     }
 

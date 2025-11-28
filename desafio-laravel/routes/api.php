@@ -94,7 +94,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/', [VideoController::class, 'store']);
             Route::put('/{id}', [VideoController::class, 'update']);
             Route::delete('/{id}', [VideoController::class, 'destroy']);
+            // Route::get('videos/teacher', [VideoController::class, 'teacherVideos']);
         });
+
+        Route::middleware('role:teacher|admin')->get('/teacher', [VideoController::class, 'teacherVideos']);
+
+
 
         // Student marca e desmarca assistido
         Route::post('/{id}/watched', [VideoController::class, 'markAsWatched'])
@@ -136,5 +141,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:admin')->group(function () {
         Route::post('/admin/create-teacher', [CreateTeacherController::class, 'createTeacher']);
+    });
+
+    Route::middleware(['auth:sanctum', 'role:teacher|admin'])->group(function () {
+
+        Route::get('/teacher/stats', function () {
+            return [
+                'courses' => \App\Models\Course::count(),
+                'videos'  => \App\Models\Video::count(),
+                'students' => \App\Models\User::role('student')->count(),
+            ];
+        });
     });
 });

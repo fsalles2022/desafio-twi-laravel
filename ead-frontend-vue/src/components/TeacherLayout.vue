@@ -10,97 +10,96 @@ const route = useRoute()
 <template>
   <div class="d-flex flex-column min-vh-100 bg-light text-dark">
 
-    <!-- Spinner de carregamento do usuário -->
-    <div v-if="auth.user === null" class="d-flex justify-content-center align-items-center flex-grow-1">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Carregando...</span>
-      </div>
+    <!-- LOADING -->
+    <div v-if="auth.user === null" class="loading-screen">
+      <div class="spinner-border text-success" role="status"></div>
     </div>
 
-    <!-- Layout principal -->
+    <!-- LAYOUT PRINCIPAL -->
     <template v-else>
-
-      <!-- Header -->
-      <header class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+      
+      <!-- HEADER -->
+      <header class="navbar navbar-expand-lg shadow-sm teacher-header">
         <div class="container">
-          <RouterLink to="/" class="navbar-brand fw-bold text-uppercase d-flex align-items-center">
-            🎬 DEVNEST
-            <span class="fs-6 ms-2 fw-normal">Painel do Professor</span>
+
+          <!-- LOGO -->
+          <RouterLink to="/courses" class="navbar-brand fw-bold d-flex align-items-center text-white">
+            <i class="bi bi-easel2-fill me-2 fs-4"></i>
+            <span>DEVNEST • Professor</span>
           </RouterLink>
 
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavTeacher">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navTeacher">
             <span class="navbar-toggler-icon"></span>
           </button>
 
-          <div class="collapse navbar-collapse justify-content-end" id="navbarNavTeacher">
-            <ul class="navbar-nav align-items-center gap-2">
+          <!-- MENU -->
+          <div class="collapse navbar-collapse justify-content-end" id="navTeacher">
+            <ul class="navbar-nav align-items-center gap-3">
 
-              <!-- Links do professor -->
+              <!-- DASHBOARD -->
               <li class="nav-item">
                 <RouterLink
                   to="/teacher/dashboard"
-                  class="nav-link fw-semibold"
-                  :class="{ 'text-white active': route.path === '/teacher/dashboard', 'text-light': route.path !== '/teacher/dashboard' }"
+                  class="nav-link teacher-nav"
+                  :class="{ active: route.path === '/teacher/dashboard' }"
                 >
-                  Dashboard
+                  <i class="bi bi-speedometer2 me-1"></i> Dashboard
                 </RouterLink>
               </li>
 
+              <!-- CURSOS -->
               <li class="nav-item">
                 <RouterLink
-                  to="/teacher/courses"
-                  class="nav-link fw-semibold"
-                  :class="{ 'text-white active': route.path.includes('/teacher/courses'), 'text-light': !route.path.includes('/teacher/courses') }"
+                  to="/courses"
+                  class="nav-link teacher-nav"
+                  :class="{ active: route.path.includes('/courses') }"
                 >
-                  Meus Cursos
+                  <i class="bi bi-journal-code me-1"></i> Meus Cursos
                 </RouterLink>
               </li>
 
+              <!-- VÍDEOS -->
               <li class="nav-item">
                 <RouterLink
-                  to="/teacher/videos"
-                  class="nav-link fw-semibold"
-                  :class="{ 'text-white active': route.path.includes('/teacher/videos'), 'text-light': !route.path.includes('/teacher/videos') }"
+                  to="/videos"
+                  class="nav-link teacher-nav"
+                  :class="{ active: route.path.includes('/videos') }"
                 >
-                  Meus Vídeos
+                  <i class="bi bi-camera-reels me-1"></i> Meus Vídeos
                 </RouterLink>
               </li>
 
-              <!-- Dropdown do usuário logado -->
+              <!-- USER DROPDOWN -->
               <li class="nav-item dropdown" v-if="auth.user">
-                <a
-                  class="nav-link dropdown-toggle text-white fw-semibold"
-                  href="#"
-                  id="navbarDropdownTeacher"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                >
-                  Olá, <strong>{{ auth.user.name }}</strong>!
+                <a class="nav-link dropdown-toggle text-white fw-semibold" data-bs-toggle="dropdown" href="#">
+                  <img
+                    :src="auth.user.image ? `http://localhost:8000/storage/${auth.user.image}` : 'https://via.placeholder.com/35?text=U'"
+                    class="rounded-circle me-2"
+                    width="35" height="35"
+                  />
+                  {{ auth.user.name }}
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownTeacher">
-                  <li>
-                    <RouterLink to="/profile" class="dropdown-item">Meu Perfil</RouterLink>
-                  </li>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                  <li><RouterLink to="/profile" class="dropdown-item">Meu Perfil</RouterLink></li>
                   <li><hr class="dropdown-divider" /></li>
-                  <li>
-                    <button @click="auth.logout" class="dropdown-item text-danger">Sair</button>
-                  </li>
+                  <li><button @click="auth.logout" class="dropdown-item text-danger">Sair</button></li>
                 </ul>
               </li>
 
             </ul>
           </div>
+
         </div>
       </header>
 
-      <!-- Conteúdo -->
+      <!-- CONTEÚDO -->
       <main class="flex-grow-1 py-5">
         <div class="container">
           <RouterView />
         </div>
       </main>
 
-      <!-- Footer -->
       <Footer />
 
     </template>
@@ -108,7 +107,52 @@ const route = useRoute()
 </template>
 
 <style scoped>
-.nav-link.active {
-  border-bottom: 2px solid #fff;
+/* HEADER */
+.teacher-header {
+  background: linear-gradient(90deg, #198754, #157347);
+  padding: 15px 0;
+}
+
+/* NAV LINKS */
+.teacher-nav {
+  color: #e8f5e9 !important;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 6px;
+  transition: 0.25s ease;
+}
+
+.teacher-nav:hover {
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.teacher-nav.active {
+  color: #fff !important;
+}
+
+.teacher-nav.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #ffffff;
+  border-radius: 10px;
+}
+
+/* LOADING */
+.loading-screen {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* DROPDOWN */
+.dropdown-menu {
+  border-radius: 10px;
+  overflow: hidden;
 }
 </style>

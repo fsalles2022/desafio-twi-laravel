@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Videos from '../views/Videos.vue'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '../stores/auth.js'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -48,6 +48,12 @@ const router = createRouter({
       component: () => import('../views/Register.vue'),
     },
 
+    {
+      path: '/teacher/dashboard',
+      name: 'teacher-dashboard',
+      component: () => import('../views/teacher/Dashboard.vue'),
+    },
+
     // 404
     {
       path: '/:pathMatch(.*)*',
@@ -64,15 +70,6 @@ router.beforeEach(async (to, from, next) => {
   // se a rota precisa de login
   if (to.meta.requiresAuth && !auth.token) {
     return next('/login')
-  }
-
-  // define dinamicamente o layout APÓS logado
-  if (auth.user) {
-    const isTeacher = auth.user.roles?.includes('teacher')
-
-    auth.currentLayout = isTeacher
-      ? 'TeacherLayout'
-      : 'StudentLayout'
   }
 
   next()
