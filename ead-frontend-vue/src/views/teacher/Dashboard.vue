@@ -37,8 +37,9 @@ async function loadDashboard() {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
 
-
-    videos.value = videosResponse.data;
+    // IDs dos cursos do professor
+    const courseIds = courses.value.map(c => c.id);
+    videos.value = videosResponse.data.filter(v => courseIds.includes(v.course_id));
 
     // 3️⃣ Contar alunos dos cursos do professor
     studentsCount.value = courses.value.reduce((acc, course) => {
