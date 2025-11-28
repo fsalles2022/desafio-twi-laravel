@@ -14,6 +14,7 @@ class User extends Authenticatable
 
     protected $fillable = ['name', 'email', 'password', 'image'];
     protected $hidden = ['password', 'remember_token'];
+    protected $guard_name = 'api';
 
     /**
      * Cursos criados ou matriculados do usuário

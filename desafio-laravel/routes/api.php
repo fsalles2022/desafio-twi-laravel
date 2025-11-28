@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CreateTeacherController;
 
 
 /*
@@ -12,6 +13,7 @@ use App\Http\Controllers\UserController;
 | AUTH
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -32,7 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     | USERS (somente teacher)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('users')->middleware('role:teacher')->group(function () {
+    Route::prefix('users')->middleware('role:teacher|admin')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::get('/{id}', [UserController::class, 'show']);
@@ -72,7 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     | COURSES – CRUD apenas teacher
     |--------------------------------------------------------------------------
     */
-    Route::prefix('courses')->middleware('role:teacher')->group(function () {
+    Route::prefix('courses')->middleware('role:teacher|admin')->group(function () {
         Route::post('/', [CourseController::class, 'store']);
         Route::put('/{course}', [CourseController::class, 'update']);
         Route::delete('/{course}', [CourseController::class, 'destroy']);
@@ -89,7 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [VideoController::class, 'show']);
 
         // CRUD (somente teacher)
-        Route::middleware('role:teacher')->group(function () {
+        Route::middleware('role:teacher|admin')->group(function () {
             Route::post('/', [VideoController::class, 'store']);
             Route::put('/{id}', [VideoController::class, 'update']);
             Route::delete('/{id}', [VideoController::class, 'destroy']);
@@ -131,5 +133,9 @@ Route::middleware('auth:sanctum')->group(function () {
         );
 
         return response()->json(array_values($videos));
+    });
+
+    Route::middleware('role:admin')->group(function () {
+        Route::post('/admin/create-teacher', [CreateTeacherController::class, 'createTeacher']);
     });
 });
