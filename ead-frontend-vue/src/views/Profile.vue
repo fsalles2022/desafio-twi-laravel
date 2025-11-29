@@ -33,7 +33,9 @@
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const auth = useAuthStore()
 
 // Formulário
@@ -56,27 +58,29 @@ const onFileChange = (e) => {
 
 // Atualizar perfil
 const updateProfile = async () => {
-  const data = new FormData()
-  data.append('name', form.value.name)
-  data.append('email', form.value.email)
-  if (form.value.image) data.append('image', form.value.image)
-  
-  data.append('_method', 'POST') // Para compatibilidade com Laravel
+  const data = new FormData();
+  data.append("name", form.value.name);
+  data.append("email", form.value.email);
+  if (form.value.image) data.append("image", form.value.image);
 
   try {
-    const res = await axios.post('http://localhost:8000/api/profile', data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    const res = await axios.post("http://localhost:8000/api/profile", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
-    // Atualiza Pinia e localStorage
-    auth.user = res.data
-    localStorage.setItem('user', JSON.stringify(res.data))
-    alert('Perfil atualizado com sucesso!')
+    auth.user = res.data;
+    localStorage.setItem("user", JSON.stringify(res.data));
+
+    alert("Perfil atualizado com sucesso!");
+
+    // 🔥 Mantém na mesma página
+    router.push("/teacher/dashboard");
+
   } catch (err) {
-    console.error('Erro ao atualizar perfil:', err.response?.data || err)
-    alert('Erro ao atualizar perfil')
+    alert("Erro ao atualizar perfil");
   }
-}
+};
+
 </script>
 
 <style scoped>
