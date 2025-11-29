@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\Video;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage; // 👈 ADICIONE ISSO
+
+
 
 class UserController extends Controller
 {
@@ -115,16 +118,29 @@ class UserController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        // 📌 Se foi enviada uma nova imagem
         if ($request->hasFile('image')) {
+
+            // 🔥 Apagar imagem antiga antes de salvar a nova
+            if ($user->image && \Storage::disk('public')->exists($user->image)) {
+                \Storage::disk('public')->delete($user->image);
+            }
+
+            // 📁 Salvar nova imagem
             $path = $request->file('image')->store('users', 'public');
             $data['image'] = $path;
         }
 
+        // 🔐 Atualizar senha se enviada
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
 
+        // Atualizar dados do usuário
         $user->update($data);
+
+        // 🔗 Criar URL completa da imagem
+        $user->image_url = $user->image ? asset('storage/' . $user->image) : null;
 
         return response()->json($user);
     }
