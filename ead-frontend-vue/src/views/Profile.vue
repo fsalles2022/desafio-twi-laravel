@@ -60,8 +60,8 @@ const updateProfile = async () => {
   data.append('name', form.value.name)
   data.append('email', form.value.email)
   if (form.value.image) data.append('image', form.value.image)
-
-  // data.append('_method', 'PUT') // Para compatibilidade com Laravel
+  
+  data.append('_method', 'POST') // Para compatibilidade com Laravel
 
   try {
     const res = await axios.post('http://localhost:8000/api/profile', data, {
