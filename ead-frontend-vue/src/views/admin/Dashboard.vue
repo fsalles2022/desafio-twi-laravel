@@ -580,32 +580,27 @@ async function saveTeacher() {
       name: teacherForm.value.name,
       email: teacherForm.value.email,
       password: teacherForm.value.password,
-      role: "teacher"
+      password_confirmation: teacherForm.value.password, // NECESSÁRIO!
     };
 
-    if (editingTeacher.value) {
-      payload.id = editingTeacher.value.id;
-      await axios.put(
-        `http://localhost:8000/api/teachers/${editingTeacher.value.id}`,
-        payload,
-        authHeaders()
-      );
-    } else {
-      await axios.post(
-        "http://localhost:8000/api/teachers",
-        payload,
-        authHeaders()
-      );
-    }
+    await axios.post(
+      "http://localhost:8000/api/admin/create-teacher",
+      payload,
+      authHeaders()
+    );
 
     await loadDashboard();
     closeTeacherModal();
+
   } catch (err) {
-    teacherError.value = err?.response?.data?.message || "Erro ao salvar professor.";
+    teacherError.value =
+      err?.response?.data?.message ||
+      "Erro ao cadastrar professor.";
   } finally {
     teacherLoading.value = false;
   }
 }
+
 
 async function deleteTeacher(t) {
   if (!confirm(`Excluir professor "${t.name}"?`)) return;

@@ -28,7 +28,7 @@ class CreateTeacherController extends Controller
             'password' => Hash::make($request->password),
             'image'    => $imagePath,
         ]);
-        
+
 
         // Atribui a role de teacher
         $user->assignRole('teacher');
@@ -40,5 +40,10 @@ class CreateTeacherController extends Controller
             'user'  => $user,
             'roles' => $user->getRoleNames(),
         ], 201);
+    }
+
+    public function index()
+    {
+        return User::role('teacher')->get();
     }
 }

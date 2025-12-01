@@ -137,7 +137,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:admin')->group(function () {
         Route::post('/admin/create-teacher', [CreateTeacherController::class, 'createTeacher']);
+        Route::get('/teachers', [CreateTeacherController::class, 'index']); // <--- NECESSÁRIO!
     });
+
+
+
 
     Route::middleware(['auth:sanctum', 'role:teacher|admin'])->group(function () {
 
