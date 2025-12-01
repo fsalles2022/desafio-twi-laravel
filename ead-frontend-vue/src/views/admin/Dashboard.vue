@@ -48,6 +48,17 @@
         </div>
 
         <div class="col-md-4">
+          <div class="dash-card shadow-sm border-0 p-4 rounded-4 bg-gradient-2 text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="fw-semibold">Professores</h5>
+              <i class="bi bi-person-badge fs-2 opacity-75"></i>
+            </div>
+            <h1 class="fw-bold mt-3">{{ teachers.length }}</h1>
+          </div>
+        </div>
+
+
+        <div class="col-md-4">
           <div class="dash-card shadow-sm border-0 p-4 rounded-4 bg-gradient-3 text-white">
             <div class="d-flex justify-content-between align-items-center">
               <h5 class="fw-semibold">Total de Alunos</h5>
@@ -234,6 +245,83 @@
       </div>
     </div>
 
+    <!-- ===== TEACHER MODAL ===== -->
+    <div v-if="showTeacherModal" class="modal-backdrop" @click="closeTeacherModal">
+      <div class="modal-container" @click.stop>
+
+        <div class="modal-header">
+          <h3>{{ editingTeacher ? "Editar Professor" : "Cadastrar Professor" }}</h3>
+          <button class="btn-close" @click="closeTeacherModal">×</button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="form-group mb-2">
+            <label class="form-label">Nome</label>
+            <input v-model="teacherForm.name" class="form-control" placeholder="Nome do professor" />
+          </div>
+
+          <div class="form-group mb-2">
+            <label class="form-label">Email</label>
+            <input v-model="teacherForm.email" class="form-control" placeholder="Email" />
+          </div>
+
+          <div class="form-group mb-2">
+            <label class="form-label">Senha</label>
+            <input v-model="teacherForm.password" type="password" class="form-control" placeholder="Senha" />
+          </div>
+
+          <div v-if="teacherError" class="alert alert-danger small">{{ teacherError }}</div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="closeTeacherModal">Cancelar</button>
+
+          <button class="btn btn-success" :disabled="teacherLoading" @click="saveTeacher">
+            <span v-if="teacherLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ editingTeacher ? "Salvar" : "Cadastrar" }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- PROFESSORES -->
+    <div class="col-md-12 mb-4">
+      <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold m-0">👩‍🏫 Professores Cadastrados</h5>
+
+          <button class="btn btn-outline-primary btn-sm" @click="openNewTeacherModal">
+            + Novo Professor
+          </button>
+        </div>
+
+        <div v-if="teachers.length === 0">
+          <p class="text-muted">Nenhum professor cadastrado.</p>
+        </div>
+
+        <ul class="list-group list-group-flush">
+          <li v-for="t in teachers" :key="t.id"
+            class="list-group-item d-flex justify-content-between align-items-center">
+
+            <div>
+              <div class="fw-semibold">{{ t.name }}</div>
+              <div class="text-muted small">{{ t.email }}</div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-danger" @click="deleteTeacher(t)">Excluir</button>
+            </div>
+
+          </li>
+        </ul>
+      </div>
+    </div>
+
+
 
   </div>
 </template>
@@ -264,6 +352,22 @@ const videoForm = ref({ title: '', description: '', course_id: '', file: null })
 const videoLoading = ref(false);
 const videoError = ref('');
 
+// ==== TEACHERS ====
+const teachers = ref([]);
+
+const showTeacherModal = ref(false);
+const editingTeacher = ref(null);
+
+const teacherForm = ref({
+  name: "",
+  email: "",
+  password: "",
+});
+
+const teacherLoading = ref(false);
+const teacherError = ref("");
+
+
 // helper to build auth header
 function authHeaders() {
   return { headers: { Authorization: `Bearer ${auth.token}` } };
@@ -291,6 +395,11 @@ async function loadDashboard() {
 
     // students count
     studentsCount.value = courses.value.reduce((acc, course) => acc + (course.students?.length || 0), 0);
+
+    // teachers
+    const teachersResponse = await axios.get("http://localhost:8000/api/teachers", authHeaders());
+    teachers.value = Array.isArray(teachersResponse.data) ? teachersResponse.data : [];
+
 
   } catch (err) {
     console.error('Erro ao carregar dashboard:', err);
@@ -448,6 +557,67 @@ function courseTitle(id) {
   const c = courses.value.find(x => x.id === id);
   return c ? c.title : null;
 }
+
+// ========== PROFESSOR CRUD ==========
+
+function openNewTeacherModal() {
+  editingTeacher.value = null;
+  teacherForm.value = { name: "", email: "", password: "" };
+  teacherError.value = "";
+  showTeacherModal.value = true;
+}
+
+function closeTeacherModal() {
+  showTeacherModal.value = false;
+}
+
+async function saveTeacher() {
+  teacherLoading.value = true;
+  teacherError.value = "";
+
+  try {
+    const payload = {
+      name: teacherForm.value.name,
+      email: teacherForm.value.email,
+      password: teacherForm.value.password,
+      role: "teacher"
+    };
+
+    if (editingTeacher.value) {
+      payload.id = editingTeacher.value.id;
+      await axios.put(
+        `http://localhost:8000/api/teachers/${editingTeacher.value.id}`,
+        payload,
+        authHeaders()
+      );
+    } else {
+      await axios.post(
+        "http://localhost:8000/api/teachers",
+        payload,
+        authHeaders()
+      );
+    }
+
+    await loadDashboard();
+    closeTeacherModal();
+  } catch (err) {
+    teacherError.value = err?.response?.data?.message || "Erro ao salvar professor.";
+  } finally {
+    teacherLoading.value = false;
+  }
+}
+
+async function deleteTeacher(t) {
+  if (!confirm(`Excluir professor "${t.name}"?`)) return;
+
+  try {
+    await axios.delete(`http://localhost:8000/api/teachers/${t.id}`, authHeaders());
+    await loadDashboard();
+  } catch (err) {
+    alert("Erro ao excluir professor.");
+  }
+}
+
 
 onMounted(() => {
   loadDashboard();
