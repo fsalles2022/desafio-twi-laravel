@@ -1,134 +1,171 @@
+<script setup>
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+import Footer from './Footer.vue'
+import { useAuthStore } from '../stores/auth'
+
+
+
+const auth = useAuthStore()
+const route = useRoute()
+</script>
+
 <template>
-  <div class="admin-layout d-flex">
-    <!-- Sidebar -->
-    <aside :class="['sidebar', { collapsed: isCollapsed }]">
-      <div class="sidebar-header">
-        <h3 v-if="!isCollapsed">ADMIN</h3>
-        <h3 v-else>A</h3>
-      </div>
+  <div class="d-flex flex-column min-vh-100 bg-light text-dark">
 
-      <nav class="sidebar-nav">
-        <router-link to="/admin/dashboard" class="nav-item" active-class="active">
-          <i class="bi bi-speedometer2"></i>
-          <span v-if="!isCollapsed">Dashboard</span>
-        </router-link>
+    <!-- LOADING -->
+    <div v-if="auth.user === null" class="loading-screen">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
 
-        <router-link to="/admin/users" class="nav-item" active-class="active">
-          <i class="bi bi-people"></i>
-          <span v-if="!isCollapsed">Usuários</span>
-        </router-link>
+    <!-- LAYOUT PRINCIPAL -->
+    <template v-else>
 
-        <router-link to="/admin/courses" class="nav-item" active-class="active">
-          <i class="bi bi-journal-text"></i>
-          <span v-if="!isCollapsed">Cursos</span>
-        </router-link>
+      <!-- HEADER -->
+      <header class="navbar navbar-expand-lg shadow-sm admin-header">
+        <div class="container">
 
-        <router-link to="/admin/videos" class="nav-item" active-class="active">
-          <i class="bi bi-camera-video"></i>
-          <span v-if="!isCollapsed">Vídeos</span>
-        </router-link>
-      </nav>
-    </aside>
+          <!-- LOGO -->
+          <RouterLink to="/admin/dashboard" class="navbar-brand fw-bold d-flex align-items-center text-white">
+            <i class="bi bi-speedometer2 me-2 fs-4"></i>
+            <span>DEVNEST • Admin</span>
+          </RouterLink>
 
-    <!-- Main content -->
-    <div class="main">
-      <header class="header d-flex align-items-center justify-content-between">
-        <button class="btn btn-outline-primary btn-sm" @click="toggleSidebar">
-          <i class="bi" :class="isCollapsed ? 'bi-list' : 'bi-x-lg'"></i>
-        </button>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navAdmin">
+            <span class="navbar-toggler-icon"></span>
+          </button>
 
-        <div class="user-info">
-          <span>{{ auth.user?.name }}</span>
-          <button class="btn btn-danger btn-sm ms-3" @click="logout">Sair</button>
+          <!-- MENU -->
+          <div class="collapse navbar-collapse justify-content-end" id="navAdmin">
+            <ul class="navbar-nav align-items-center gap-3">
+
+              <!-- DASHBOARD -->
+              <li class="nav-item">
+                <RouterLink
+                  to="/admin/dashboard"
+                  class="nav-link admin-nav"
+                  :class="{ active: route.path === '/admin/dashboard' }"
+                >
+                  <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                </RouterLink>
+              </li>
+
+              <!-- USUÁRIOS -->
+              <li class="nav-item">
+                <RouterLink
+                  to="/admin/users"
+                  class="nav-link admin-nav"
+                  :class="{ active: route.path.includes('/admin/users') }"
+                >
+                  <i class="bi bi-people me-1"></i> Usuários
+                </RouterLink>
+              </li>
+
+              <!-- CURSOS -->
+              <li class="nav-item">
+                <RouterLink
+                  to="/admin/courses"
+                  class="nav-link admin-nav"
+                  :class="{ active: route.path.includes('/admin/courses') }"
+                >
+                  <i class="bi bi-journal-code me-1"></i> Cursos
+                </RouterLink>
+              </li>
+
+              <!-- VÍDEOS -->
+              <li class="nav-item">
+                <RouterLink
+                  to="/admin/videos"
+                  class="nav-link admin-nav"
+                  :class="{ active: route.path.includes('/admin/videos') }"
+                >
+                  <i class="bi bi-camera-reels me-1"></i> Vídeos
+                </RouterLink>
+              </li>
+
+              <!-- USER DROPDOWN -->
+              <li class="nav-item dropdown" v-if="auth.user">
+                <a class="nav-link dropdown-toggle text-white fw-semibold" data-bs-toggle="dropdown" href="#">
+                  <img
+                    :src="auth.user.image ? `http://localhost:8000/storage/${auth.user.image}` : 'https://via.placeholder.com/35?text=U'"
+                    class="rounded-circle me-2"
+                    width="35" height="35"
+                  />
+                  {{ auth.user.name }}
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                  <li><RouterLink to="/admin/profile" class="dropdown-item">Meu Perfil</RouterLink></li>
+                  <li><hr class="dropdown-divider" /></li>
+                  <li><button @click="auth.logout" class="dropdown-item text-danger">Sair</button></li>
+                </ul>
+              </li>
+
+            </ul>
+          </div>
+
         </div>
       </header>
 
-      <div class="content p-4">
-        <slot />
-      </div>
-    </div>
+      <!-- CONTEÚDO -->
+      <main class="flex-grow-1 py-5">
+        <div class="container">
+          <RouterView />
+        </div>
+      </main>
+
+      <Footer />
+
+    </template>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import { useAuthStore } from '../stores/auth'
-
-const isCollapsed = ref(false)
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
-
-const auth = useAuthStore()
-const logout = () => auth.logout()
-</script>
-
 <style scoped>
-.admin-layout {
+/* HEADER */
+.admin-header {
+  background: linear-gradient(90deg, #0d6efd, #0b5ed7);
+  padding: 15px 0;
+}
+
+/* NAV LINKS */
+.admin-nav {
+  color: #e8f5ff !important;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 6px;
+  transition: 0.25s ease;
+}
+
+.admin-nav:hover {
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.admin-nav.active {
+  color: #fff !important;
+}
+
+.admin-nav.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #ffffff;
+  border-radius: 10px;
+}
+
+/* LOADING */
+.loading-screen {
   height: 100vh;
-  background: #f8f9fa;
-}
-
-.sidebar {
-  width: 240px;
-  background: #343a40;
-  color: white;
-  transition: width .3s;
   display: flex;
-  flex-direction: column;
-}
-.sidebar.collapsed {
-  width: 70px;
-}
-
-.sidebar-header {
-  padding: 20px;
-  font-weight: bold;
-  text-align: center;
-  border-bottom: 1px solid #495057;
-}
-
-.sidebar-nav {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding-top: 10px;
-}
-
-.nav-item {
-  color: white;
-  padding: 12px 18px;
-  text-decoration: none;
-  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
-  font-size: 15px;
-  transition: background .2s;
 }
 
-.nav-item:hover {
-  background: #495057;
-}
-
-.nav-item.active {
-  background: #0d6efd;
-}
-
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.header {
-  height: 60px;
-  background: white;
-  padding: 0 20px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.content {
-  flex: 1;
-  overflow-y: auto;
+/* DROPDOWN */
+.dropdown-menu {
+  border-radius: 10px;
+  overflow: hidden;
 }
 </style>

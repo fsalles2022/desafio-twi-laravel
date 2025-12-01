@@ -4,6 +4,7 @@ import Login from '../views/Login.vue'
 import Videos from '../views/Videos.vue'
 import { useAuthStore } from '../stores/auth.js'
 
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -52,6 +53,18 @@ const router = createRouter({
       path: '/teacher/dashboard',
       name: 'teacher-dashboard',
       component: () => import('../views/teacher/Dashboard.vue'),
+    },
+
+    {
+      path: '/admin/dashboard',
+      name: 'admin-dashboard',
+      component: () => import('../views/admin/Dashboard.vue'),
+    },
+
+    {
+      path: '/admin/profile',
+      name: 'admin-profile',
+      component: () => import('../views/admin/Profile.vue'),
     },
 
     // 404
