@@ -330,6 +330,17 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../../stores/auth';
+import {
+  Chart,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
 
 const auth = useAuthStore();
 
@@ -616,6 +627,53 @@ async function deleteTeacher(t) {
 
 onMounted(() => {
   loadDashboard();
+  let chartInstance = null;
+
+  function renderChart() {
+    if (!chartCanvas.value) return;
+
+    // Se existir gráfico antigo, destrói
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(chartCanvas.value, {
+      type: "bar",
+      data: {
+        labels: ["Cursos", "Vídeos", "Alunos"],
+        datasets: [
+          {
+            label: "Quantidade",
+            data: [
+              courses.value.length,
+              videos.value.length,
+              studentsCount.value,
+            ],
+            backgroundColor: ["#4e73df", "#1cc88a", "#36b9cc"],
+            borderRadius: 12,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+          },
+        },
+      },
+    });
+  }
+
+  onMounted(async () => {
+    await loadDashboard();
+    renderChart();
+  });
+
 });
 </script>
 
