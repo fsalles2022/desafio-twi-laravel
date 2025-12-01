@@ -13,36 +13,15 @@ const router = createRouter({
     { path: '/login', name: 'login', component: Login },
 
     // PROTEGIDAS
+
+     // REGISTRO DE USUÁRIOS
     {
-      path: '/videos',
-      name: 'videos',
-      component: Videos,
-      meta: { requiresAuth: true },
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/Register.vue'),
     },
 
-    // LISTA DE CURSOS
-    {
-      path: '/courses',
-      name: 'courses',
-      component: () => import('../views/admin/CourseList.vue'),
-      meta: { requiresAuth: true },
-    },
-
-       // LISTA DE CURSOS
-    {
-      path: '/teacher/courses',
-      name: 'teacher-courses',
-      component: () => import('../views/teacher/CourseList.vue'),
-      meta: { requiresAuth: true },
-    },
-    // VÍDEOS DE UM CURSO
-    {
-      path: '/course/:id',
-      name: 'course-videos',
-      component: () => import('../views/CourseVideos.vue'),
-      meta: { requiresAuth: true },
-    },
-
+     // PERFIL DE USUÁRIO
     {
       path: '/profile',
       name: 'profile',
@@ -50,24 +29,15 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-    {
-      path: '/register',
-      name: 'register',
-      component: () => import('../views/Register.vue'),
-    },
-
-    {
-      path: '/teacher/dashboard',
-      name: 'teacher-dashboard',
-      component: () => import('../views/teacher/Dashboard.vue'),
-    },
-
+    // DASHBOARD DOS ADMINISTRADORES
     {
       path: '/admin/dashboard',
       name: 'admin-dashboard',
       component: () => import('../views/admin/Dashboard.vue'),
     },
 
+
+     // PERFIL DO ADMINISTRADOR
     {
       path: '/admin/profile',
       name: 'admin-profile',
@@ -81,6 +51,52 @@ const router = createRouter({
       component: () => import('../views/admin/CourseList.vue'),
       meta: { requiresAuth: true },
     },
+
+       // LISTA DE TODOS OS CURSOS NA DASHBOARD DO ADMINISTRADOR
+    {
+      path: '/admin/courses',
+      name: 'admin-courses',
+      component: () => import('../views/admin/CourseList.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    // LISTA DE VIDEOS PARA ALUNOS
+    {
+      path: '/videos',
+      name: 'videos',
+      component: Videos,
+      meta: { requiresAuth: true },
+    },
+
+
+       // LISTA DE CURSOS DOS PROFESSORES
+    {
+      path: '/teacher/courses',
+      name: 'teacher-courses',
+      component: () => import('../views/teacher/CourseList.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    // VÍDEOS DE UM CURSO
+    {
+      path: '/course/:id',
+      name: 'course-videos',
+      component: () => import('../views/CourseVideos.vue'),
+      meta: { requiresAuth: true },
+    },
+    
+   
+
+   
+
+    // DASHBOARD DOS PROFESSORES
+    {
+      path: '/teacher/dashboard',
+      name: 'teacher-dashboard',
+      component: () => import('../views/teacher/Dashboard.vue'),
+    },
+
+    
 
     // 404
     {
