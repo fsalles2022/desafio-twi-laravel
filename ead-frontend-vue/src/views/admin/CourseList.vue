@@ -1,6 +1,6 @@
 <template>
   <div class="container py-4">
-    <h1 class="mb-4 text-center">📚 Meus Cursos</h1>
+    <h1 class="mb-4 text-center">📚 Todos os Cursos da Plataforma</h1>
 
     <div v-if="loading" class="text-center my-5">
       <div class="spinner-border text-primary"></div>
