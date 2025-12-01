@@ -1,161 +1,220 @@
 <script setup>
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-import Footer from './Footer.vue'
-import { useAuthStore } from '../stores/auth'
+import { RouterLink, RouterView, useRoute } from "vue-router";
+import Footer from "./Footer.vue";
+import { useAuthStore } from "../stores/auth";
 
-
-
-const auth = useAuthStore()
-const route = useRoute()
+const auth = useAuthStore();
+const route = useRoute();
 </script>
 
 <template>
-  <div class="d-flex flex-column min-vh-100 bg-light text-dark">
+  <div class="layout-wrapper">
 
     <!-- LOADING -->
     <div v-if="auth.user === null" class="loading-screen">
-      <div class="spinner-border text-primary" role="status"></div>
+      <div class="cyber-loader"></div>
     </div>
 
-    <!-- LAYOUT PRINCIPAL -->
+    <!-- LAYOUT -->
     <template v-else>
 
-      <!-- HEADER -->
-      <header class="navbar navbar-expand-lg shadow-sm admin-header">
-        <div class="container">
+      <!-- ==== HEADER FUTURISTA ==== -->
+      <header class="admin-header glass-nav shadow-neon">
+        <div class="container d-flex justify-content-between align-items-center">
 
           <!-- LOGO -->
-          <RouterLink to="/admin/dashboard" class="navbar-brand fw-bold d-flex align-items-center text-white">
-            <i class="bi bi-speedometer2 me-2 fs-4"></i>
-            <span>DEVNEST • Admin</span>
+          <RouterLink to="/admin/dashboard" class="logo">
+            <i class="bi bi-cpu me-2"></i> DEVNEST • ADMIN
           </RouterLink>
 
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navAdmin">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-
           <!-- MENU -->
-          <div class="collapse navbar-collapse justify-content-end" id="navAdmin">
-            <ul class="navbar-nav align-items-center gap-3">
+          <nav class="menu">
+            <RouterLink
+              class="menu-item"
+              to="/admin/dashboard"
+              :class="{ active: route.path === '/admin/dashboard' }"
+            >
+              <i class="bi bi-speedometer2"></i> Dashboard
+            </RouterLink>
 
-              <!-- DASHBOARD -->
-              <li class="nav-item">
-                <RouterLink
-                  to="/admin/dashboard"
-                  class="nav-link admin-nav"
-                  :class="{ active: route.path === '/admin/dashboard' }"
-                >
-                  <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                </RouterLink>
-              </li>
+            <RouterLink
+              class="menu-item"
+              to="/admin/users"
+              :class="{ active: route.path.includes('/admin/users') }"
+            >
+              <i class="bi bi-people"></i> Usuários
+            </RouterLink>
 
-              <!-- USUÁRIOS -->
-              <li class="nav-item">
-                <RouterLink
-                  to="/admin/users"
-                  class="nav-link admin-nav"
-                  :class="{ active: route.path.includes('/admin/users') }"
-                >
-                  <i class="bi bi-people me-1"></i> Usuários
-                </RouterLink>
-              </li>
+            <RouterLink
+              class="menu-item"
+              to="/admin/courses"
+              :class="{ active: route.path.includes('/admin/courses') }"
+            >
+              <i class="bi bi-journal-code"></i> Cursos
+            </RouterLink>
 
-              <!-- CURSOS -->
-              <li class="nav-item">
-                <RouterLink
-                  to="/admin/courses"
-                  class="nav-link admin-nav"
-                  :class="{ active: route.path.includes('/admin/courses') }"
-                >
-                  <i class="bi bi-journal-code me-1"></i> Cursos
-                </RouterLink>
-              </li>
+            <RouterLink
+              class="menu-item"
+              to="/admin/videos"
+              :class="{ active: route.path.includes('/admin/videos') }"
+            >
+              <i class="bi bi-camera-reels"></i> Vídeos
+            </RouterLink>
 
-              <!-- VÍDEOS -->
-              <li class="nav-item">
-                <RouterLink
-                  to="/admin/videos"
-                  class="nav-link admin-nav"
-                  :class="{ active: route.path.includes('/admin/videos') }"
-                >
-                  <i class="bi bi-camera-reels me-1"></i> Vídeos
-                </RouterLink>
-              </li>
+            <!-- USER -->
+            <div class="user-area dropdown" v-if="auth.user">
+              <a class="user-btn" data-bs-toggle="dropdown">
+                <img
+                  :src="auth.user.image
+                      ? 'http://localhost:8000/storage/' + auth.user.image
+                      : 'https://via.placeholder.com/40?text=U'"
+                  class="avatar"
+                />
+                {{ auth.user.name }}
+              </a>
 
-              <!-- USER DROPDOWN -->
-              <li class="nav-item dropdown" v-if="auth.user">
-                <a class="nav-link dropdown-toggle text-white fw-semibold" data-bs-toggle="dropdown" href="#">
-                  <img
-                    :src="auth.user.image ? `http://localhost:8000/storage/${auth.user.image}` : 'https://via.placeholder.com/35?text=U'"
-                    class="rounded-circle me-2"
-                    width="35" height="35"
-                  />
-                  {{ auth.user.name }}
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-end shadow">
-                  <li><RouterLink to="/admin/profile" class="dropdown-item">Meu Perfil</RouterLink></li>
-                  <li><hr class="dropdown-divider" /></li>
-                  <li><button @click="auth.logout" class="dropdown-item text-danger">Sair</button></li>
-                </ul>
-              </li>
-
-            </ul>
-          </div>
+              <ul class="dropdown-menu dropdown-menu-end glass-dropdown shadow-neon">
+                <li><RouterLink to="/admin/profile" class="dropdown-item">Meu Perfil</RouterLink></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><button @click="auth.logout" class="dropdown-item text-danger">Sair</button></li>
+              </ul>
+            </div>
+          </nav>
 
         </div>
       </header>
 
       <!-- CONTEÚDO -->
-      <main class="flex-grow-1 py-5">
+      <main class="content-area">
         <div class="container">
           <RouterView />
         </div>
       </main>
 
       <Footer />
-
     </template>
   </div>
 </template>
 
 <style scoped>
-/* HEADER */
+/* ===========================
+    TEMA FUTURISTA
+=========================== */
+.layout-wrapper {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0d0d1a, #000);
+  color: #d9eaff;
+  overflow-x: hidden;
+}
+
+/* ===========================
+    HEADER (GLASS + NEON)
+=========================== */
 .admin-header {
-  background: linear-gradient(90deg, #0d6efd, #0b5ed7);
-  padding: 15px 0;
+  padding: 18px 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(15px);
 }
 
-/* NAV LINKS */
-.admin-nav {
-  color: #e8f5ff !important;
+.glass-nav {
+  background: rgba(20, 20, 40, 0.55);
+  border-bottom: 1px solid rgba(90, 120, 255, 0.2);
+}
+
+.shadow-neon {
+  box-shadow: 0 0 20px #3b82f6aa, 0 0 40px #9333ea55 inset;
+}
+
+/* LOGO */
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #71c9ff;
+  text-decoration: none;
+  text-shadow: 0 0 10px #00c8ff, 0 0 20px #0099ff;
+  transition: 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* ===========================
+    MENU
+=========================== */
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.menu-item {
+  color: #b9ceff;
   font-weight: 600;
+  padding-bottom: 4px;
   position: relative;
-  padding-bottom: 6px;
-  transition: 0.25s ease;
+  text-decoration: none;
+  transition: 0.22s ease-out;
 }
 
-.admin-nav:hover {
-  color: #ffffff !important;
-  transform: translateY(-1px);
+.menu-item:hover {
+  color: #fff;
+  text-shadow: 0 0 8px #3b82f6;
+  transform: translateY(-2px);
 }
 
-.admin-nav.active {
-  color: #fff !important;
+.menu-item.active {
+  color: #ffffff;
+  text-shadow: 0 0 12px #60a5fa;
 }
 
-.admin-nav.active::after {
+.menu-item.active::after {
   content: "";
   position: absolute;
-  bottom: 0;
+  bottom: -3px;
   left: 0;
   width: 100%;
   height: 3px;
-  background: #ffffff;
-  border-radius: 10px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #3b82f6, #9333ea);
 }
 
-/* LOADING */
+/* ===========================
+    USER AREA
+=========================== */
+.user-area {
+  position: relative;
+}
+
+.user-btn {
+  color: #e2eafd;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #3b82f6;
+}
+
+.glass-dropdown {
+  background: rgba(20, 20, 40, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 100, 255, 0.25);
+}
+
+/* ===========================
+    LOADING FUTURISTA
+=========================== */
 .loading-screen {
   height: 100vh;
   display: flex;
@@ -163,9 +222,26 @@ const route = useRoute()
   align-items: center;
 }
 
-/* DROPDOWN */
-.dropdown-menu {
-  border-radius: 10px;
-  overflow: hidden;
+.cyber-loader {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #0ff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  box-shadow: 0 0 15px #0ff, 0 0 30px #00f5ff inset;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===========================
+    CONTEÚDO
+=========================== */
+.content-area {
+  padding: 60px 0;
 }
 </style>
