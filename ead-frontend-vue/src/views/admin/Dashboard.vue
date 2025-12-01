@@ -1,10 +1,10 @@
 <template>
-  <div class="admin-dashboard container py-4">
+  <div class="teacher-dashboard container py-4">
 
     <!-- TOP BAR (botões grandes) -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="fw-bold">Painel de Administradorss</h2>
+        <h2 class="fw-bold">Painel do Administrador</h2>
         <p class="text-muted m-0">Bem-vindo, <strong>{{ auth.user.name }}</strong></p>
       </div>
 
@@ -280,7 +280,7 @@ async function loadDashboard() {
     // ensure array
     if (!Array.isArray(fetched)) fetched = [];
 
-    // only Admin's courses
+    // only teacher's courses
     courses.value = fetched.filter(c => c.user_id === auth.user.id);
 
     // videos (all) then filter by course ids
@@ -455,7 +455,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.admin-dashboard {
+.teacher-dashboard {
   max-width: 1200px;
 }
 

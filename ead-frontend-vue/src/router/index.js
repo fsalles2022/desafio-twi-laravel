@@ -24,10 +24,17 @@ const router = createRouter({
     {
       path: '/courses',
       name: 'courses',
-      component: () => import('../views/CourseList.vue'),
+      component: () => import('../views/admin/CourseList.vue'),
       meta: { requiresAuth: true },
     },
 
+       // LISTA DE CURSOS
+    {
+      path: '/teacher/courses',
+      name: 'teacher-courses',
+      component: () => import('../views/teacher/CourseList.vue'),
+      meta: { requiresAuth: true },
+    },
     // VÍDEOS DE UM CURSO
     {
       path: '/course/:id',
@@ -65,6 +72,14 @@ const router = createRouter({
       path: '/admin/profile',
       name: 'admin-profile',
       component: () => import('../views/admin/Profile.vue'),
+    },
+
+      // LISTA DE CURSOS DO ADMINISTRADOR
+    {
+      path: '/admin/courses',
+      name: 'courses',
+      component: () => import('../views/admin/CourseList.vue'),
+      meta: { requiresAuth: true },
     },
 
     // 404

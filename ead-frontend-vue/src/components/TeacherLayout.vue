@@ -50,9 +50,9 @@ const route = useRoute()
               <!-- CURSOS -->
               <li class="nav-item">
                 <RouterLink
-                  to="/courses"
+                  to="/teacher/courses"
                   class="nav-link teacher-nav"
-                  :class="{ active: route.path.includes('/courses') }"
+                  :class="{ active: route.path.includes('/teacher/courses') }"
                 >
                   <i class="bi bi-journal-code me-1"></i> Meus Cursos
                 </RouterLink>

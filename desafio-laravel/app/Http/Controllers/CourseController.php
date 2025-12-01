@@ -42,6 +42,16 @@ class CourseController extends Controller
             ]);
         }
 
+        if ($user->hasRole('admin')) {
+            return response()->json([
+                'my_courses'  => Course::with('teacher')->orderBy('id', 'desc')->get(),
+                'all_courses' => Course::active()->with('teacher')->get(),
+            ]);
+        }
+
+
+
+
         return response()->json([], 403);
     }
 
@@ -178,15 +188,15 @@ class CourseController extends Controller
         }
 
         $watched = $user->watchedVideos()
-                        ->where('course_id', $courseId)
-                        ->get()
-                        ->map(fn($v) => [
-                            'id' => $v->id,
-                            'title' => $v->title,
-                            'description' => $v->description,
-                            'filename' => $v->filename,
-                            'watched_at' => $v->pivot->created_at,
-                        ]);
+            ->where('course_id', $courseId)
+            ->get()
+            ->map(fn($v) => [
+                'id' => $v->id,
+                'title' => $v->title,
+                'description' => $v->description,
+                'filename' => $v->filename,
+                'watched_at' => $v->pivot->created_at,
+            ]);
 
         return response()->json([
             'course_id' => $courseId,

@@ -1,6 +1,6 @@
 <template>
   <div class="container py-4">
-    <h1 class="mb-4 text-center">📚 Meus Cursossssss</h1>
+    <h1 class="mb-4 text-center">📚 Meus Cursos</h1>
 
     <div v-if="loading" class="text-center my-5">
       <div class="spinner-border text-primary"></div>
@@ -15,8 +15,10 @@
           <div class="card-body">
             <h5 class="card-title">{{ c.title }}</h5>
             <p class="text-muted">{{ c.description }}</p>
+             <p class="text-muted">Id Curso: {{ c.id }}</p>
+
             <router-link :to="`/course/${c.id}`" class="btn btn-primary w-100">
-              Acessar Curso →
+              Acessar Aulas →
             </router-link>
           </div>
         </div>
@@ -32,7 +34,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { useAuthStore } from "../stores/auth";
+import { useAuthStore } from "../../stores/auth";
 
 const auth = useAuthStore();
 const loading = ref(true);
