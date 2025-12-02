@@ -1,26 +1,28 @@
 <template>
-  <!-- MENU FUTURISTA FIXO -->
+  <!-- NAVBAR FUTURISTA -->
   <nav class="neo-navbar">
     <div class="container d-flex align-items-center justify-content-between">
 
       <!-- Logo -->
       <div class="logo">
         <i class="bi bi-layers-half"></i>
-        DEVNESTss
+        DEVNEST
       </div>
 
-      <!-- Navegação -->
+      <!-- Navegação Desktop -->
       <ul class="nav-links d-none d-md-flex">
         <li><RouterLink to="/" class="nav-item">Home</RouterLink></li>
-        <li><RouterLink to="/login" class="nav-item">Login</RouterLink></li>
-        <RouterLink to="/login" class="btn btn-outline-light btn-sm px-3 fw-semibold">
+        <li><a href="#courses" class="nav-item">Cursos</a></li>
+        <li><a href="#destaques" class="nav-item">Destaques</a></li>
+
+        <RouterLink to="/login" class="btn-neo-nav">
           Entrar
         </RouterLink>
       </ul>
 
       <!-- Botão Mobile -->
       <div class="menu-btn d-md-none" @click="menuOpen = !menuOpen">
-        <i class="bi bi-list"></i>
+        <i :class="menuOpen ? 'bi bi-x' : 'bi bi-list'"></i>
       </div>
     </div>
 
@@ -35,32 +37,31 @@
 
   <div class="home-page">
 
-    <!-- HERO FUTURISTA -->
+    <!-- HERO -->
     <section class="hero-section d-flex justify-content-center align-items-center text-white">
       <div class="overlay"></div>
 
       <div class="hero-content">
         <h1 class="title">
-          <span class="glow">Aprenda Laravel 11</span>
-          <br />
+          <span class="glow">Aprenda Laravel 11</span><br />
           <span class="subtitle glow-soft">Do Zero ao Avançado</span>
         </h1>
 
         <p class="lead-text">Cursos imersivos • Projetos reais • Comunidade ativa</p>
 
-        <RouterLink to="/login" class="btn-neo">
+        <RouterLink to="/login" class="btn-neo-big">
           Acessar Cursos
         </RouterLink>
       </div>
     </section>
 
-    <!-- DESTAQUES FUTURISTAS -->
-    <section class="container py-5">
+    <!-- DESTAQUES -->
+    <section id="destaques" class="container py-5">
       <h2 class="section-title glow-soft text-center">Destaques DEVNEST</h2>
 
       <div class="row g-4 mt-4">
         <div v-for="(card, i) in destaques" :key="i" class="col-md-4">
-          <div class="neo-card" @mousemove="handleCardMove" @mouseleave="resetCard">
+          <div class="neo-card special-card" @mousemove="handleCardMove" @mouseleave="resetCard">
             <i :class="card.icon" class="display-5 neon-icon" :style="{ color: card.color }"></i>
             <h5 class="fw-bold mt-3">{{ card.title }}</h5>
             <p class="text-muted">{{ card.desc }}</p>
@@ -69,19 +70,26 @@
       </div>
     </section>
 
-    <!-- CURSOS DINÂMICOS -->
-    <section class="courses-section py-5">
+    <!-- CURSOS -->
+    <section id="courses" class="courses-section py-5">
       <div class="container">
         <h2 class="section-title glow-soft text-center">Cursos Disponíveis</h2>
 
         <div class="row g-4 mt-4">
           <div v-for="curso in cursos" :key="curso.id" class="col-md-4">
             <div class="neo-card course-card" @mousemove="handleCardMove" @mouseleave="resetCard">
-              <img :src="curso.image ? 'http://localhost:8000/storage/' + curso.image : 'https://picsum.photos/600/400'"
-                class="card-img-top futuristic-img" />
 
+              <!-- IMAGEM -->
+              <div class="img-container">
+                <img
+                  :src="curso.image ? 'http://localhost:8000/storage/' + curso.image : 'https://picsum.photos/600/400'"
+                  class="futuristic-img"
+                />
+              </div>
+
+              <!-- CONTEÚDO -->
               <div class="p-3 text-center">
-                <h5 class="fw-bold">{{ curso.title }}</h5>
+                <h5 class="fw-bold text-white">{{ curso.title }}</h5>
                 <p class="text-muted small">{{ curso.description }}</p>
               </div>
 
@@ -100,7 +108,7 @@
       <h2 class="fw-bold glow-soft">Pronto para Começar?</h2>
       <p class="lead mt-2">Entre agora e transforme sua carreira na programação.</p>
 
-      <RouterLink to="/login" class="btn-neo">Vamos lá 🚀</RouterLink>
+      <RouterLink to="/login" class="btn-neo-big">Vamos lá 🚀</RouterLink>
     </section>
 
   </div>
@@ -109,14 +117,8 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import axios from "axios"
+
 const menuOpen = ref(false)
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-
-const auth = useAuthStore()
-const route = useRoute()
-
-// === Cursos reais da API ===
 const cursos = ref([])
 
 async function loadCursos() {
@@ -132,7 +134,6 @@ onMounted(() => {
   loadCursos()
 })
 
-// === Destaques ===
 const destaques = [
   {
     icon: "bi bi-cpu",
@@ -162,10 +163,10 @@ function handleCardMove(e) {
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
 
-  const rotX = ((y / rect.height - 0.5) * 15).toFixed(2)
-  const rotY = ((x / rect.width - 0.5) * -15).toFixed(2)
+  const rotX = ((y / rect.height - 0.5) * 12).toFixed(2)
+  const rotY = ((x / rect.width - 0.5) * -12).toFixed(2)
 
-  card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.06)`
+  card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.05)`
 }
 
 function resetCard(e) {
@@ -173,6 +174,11 @@ function resetCard(e) {
   card.style.transform = "rotateX(0) rotateY(0) scale(1)"
 }
 </script>
+
+<style scoped>
+/* (CSS completo permanece igual ao que você enviou — já está tudo otimizado) */
+</style>
+
 
 <style scoped>
 /* ===== NAVBAR FUTURISTA ===== */
