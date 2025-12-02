@@ -45,7 +45,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const res = await axios.post('http://localhost:8000/api/auth/login', { email, password })
         this.setAuth(res.data)
-        router.push('/courses')
+        router.push('/welcome')
       } catch (err) {
         console.error('Erro no login:', err)
         alert('Login inválido')

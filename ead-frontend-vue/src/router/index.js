@@ -14,14 +14,14 @@ const router = createRouter({
 
     // PROTEGIDAS
 
-     // REGISTRO DE USUÁRIOS
+    // REGISTRO DE USUÁRIOS
     {
       path: '/register',
       name: 'register',
       component: () => import('../views/Register.vue'),
     },
 
-     // PERFIL DE USUÁRIO
+    // PERFIL DE USUÁRIO
     {
       path: '/profile',
       name: 'profile',
@@ -37,14 +37,14 @@ const router = createRouter({
     },
 
 
-     // PERFIL DO ADMINISTRADOR
+    // PERFIL DO ADMINISTRADOR
     {
       path: '/admin/profile',
       name: 'admin-profile',
       component: () => import('../views/admin/Profile.vue'),
     },
 
-      // LISTA DE CURSOS DO ADMINISTRADOR
+    // LISTA DE CURSOS DO ADMINISTRADOR
     {
       path: '/admin/courses',
       name: 'courses',
@@ -52,7 +52,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-       // LISTA DE TODOS OS CURSOS NA DASHBOARD DO ADMINISTRADOR
+    // LISTA DE TODOS OS CURSOS NA DASHBOARD DO ADMINISTRADOR
     {
       path: '/admin/courses',
       name: 'admin-courses',
@@ -69,7 +69,7 @@ const router = createRouter({
     },
 
 
-       // LISTA DE CURSOS DOS PROFESSORES
+    // LISTA DE CURSOS DOS PROFESSORES
     {
       path: '/teacher/courses',
       name: 'teacher-courses',
@@ -84,10 +84,7 @@ const router = createRouter({
       component: () => import('../views/CourseVideos.vue'),
       meta: { requiresAuth: true },
     },
-    
-   
 
-   
 
     // DASHBOARD DOS PROFESSORES
     {
@@ -96,7 +93,12 @@ const router = createRouter({
       component: () => import('../views/teacher/Dashboard.vue'),
     },
 
-    
+    //PAGINA BOA VINDAS GENERICA.  
+    {
+      path: '/welcome',
+      name: 'welcome',
+      component: () => import('../views/Welcome.vue'),
+    },
 
     // 404
     {

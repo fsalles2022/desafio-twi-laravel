@@ -17,7 +17,7 @@ const route = useRoute()
 
     <!-- LAYOUT PRINCIPAL -->
     <template v-else>
-      
+
       <!-- HEADER -->
       <header class="navbar navbar-expand-lg shadow-sm teacher-header">
         <div class="container">
@@ -36,35 +36,33 @@ const route = useRoute()
           <div class="collapse navbar-collapse justify-content-end" id="navTeacher">
             <ul class="navbar-nav align-items-center gap-3">
 
+               <li class="nav-item">
+                <RouterLink to="/welcome" class="nav-link teacher-nav"
+                  :class="{ active: route.path.includes('/welcome') }">
+                  <i class="bi bi-emoji-smile welcome-icon"></i>Boas vindas!
+                </RouterLink>
+              </li>
+
               <!-- DASHBOARD -->
               <li class="nav-item">
-                <RouterLink
-                  to="/teacher/dashboard"
-                  class="nav-link teacher-nav"
-                  :class="{ active: route.path === '/teacher/dashboard' }"
-                >
+                <RouterLink to="/teacher/dashboard" class="nav-link teacher-nav"
+                  :class="{ active: route.path === '/teacher/dashboard' }">
                   <i class="bi bi-speedometer2 me-1"></i> Dashboard
                 </RouterLink>
               </li>
 
               <!-- CURSOS -->
               <li class="nav-item">
-                <RouterLink
-                  to="/teacher/courses"
-                  class="nav-link teacher-nav"
-                  :class="{ active: route.path.includes('/teacher/courses') }"
-                >
+                <RouterLink to="/teacher/courses" class="nav-link teacher-nav"
+                  :class="{ active: route.path.includes('/teacher/courses') }">
                   <i class="bi bi-journal-code me-1"></i> Meus Cursos
                 </RouterLink>
               </li>
 
               <!-- VÍDEOS -->
               <li class="nav-item">
-                <RouterLink
-                  to="/videos"
-                  class="nav-link teacher-nav"
-                  :class="{ active: route.path.includes('/videos') }"
-                >
+                <RouterLink to="/videos" class="nav-link teacher-nav"
+                  :class="{ active: route.path.includes('/videos') }">
                   <i class="bi bi-camera-reels me-1"></i> Meus Vídeos
                 </RouterLink>
               </li>
@@ -74,15 +72,17 @@ const route = useRoute()
                 <a class="nav-link dropdown-toggle text-white fw-semibold" data-bs-toggle="dropdown" href="#">
                   <img
                     :src="auth.user.image ? `http://localhost:8000/storage/${auth.user.image}` : 'https://via.placeholder.com/35?text=U'"
-                    class="rounded-circle me-2"
-                    width="35" height="35"
-                  />
+                    class="rounded-circle me-2" width="35" height="35" />
                   {{ auth.user.name }}
                 </a>
 
                 <ul class="dropdown-menu dropdown-menu-end shadow">
-                  <li><RouterLink to="/profile" class="dropdown-item">Meu Perfil</RouterLink></li>
-                  <li><hr class="dropdown-divider" /></li>
+                  <li>
+                    <RouterLink to="/profile" class="dropdown-item">Meu Perfil</RouterLink>
+                  </li>
+                  <li>
+                    <hr class="dropdown-divider" />
+                  </li>
                   <li><button @click="auth.logout" class="dropdown-item text-danger">Sair</button></li>
                 </ul>
               </li>
@@ -109,7 +109,7 @@ const route = useRoute()
 <style scoped>
 /* HEADER */
 .teacher-header {
-  background: linear-gradient(90deg, #198754, #157347);
+  background: linear-gradient(90deg, #0b0c0c, #157347);
   padding: 15px 0;
 }
 

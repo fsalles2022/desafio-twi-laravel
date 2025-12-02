@@ -23,59 +23,49 @@ const route = useRoute();
         <div class="container d-flex justify-content-between align-items-center">
 
           <!-- LOGO -->
-          <RouterLink to="/admin/dashboard" class="logo">
+          <RouterLink to="/welcome" class="logo">
             <i class="bi bi-cpu me-2"></i> DEVNEST • ADMIN
           </RouterLink>
 
           <!-- MENU -->
           <nav class="menu">
-            <RouterLink
-              class="menu-item"
-              to="/admin/dashboard"
-              :class="{ active: route.path === '/admin/dashboard' }"
-            >
+            <RouterLink class="menu-item" to="/welcome" :class="{ active: route.path === '/welcome' }">
+              <i class="bi bi-plug"></i>welcome
+            </RouterLink>
+
+            <RouterLink class="menu-item" to="/admin/dashboard" :class="{ active: route.path === '/admin/dashboard' }">
               <i class="bi bi-speedometer2"></i> Dashboard
             </RouterLink>
 
-            <RouterLink
-              class="menu-item"
-              to="/admin/users"
-              :class="{ active: route.path.includes('/admin/users') }"
-            >
+            <RouterLink class="menu-item" to="/admin/users" :class="{ active: route.path.includes('/admin/users') }">
               <i class="bi bi-people"></i> Usuários
             </RouterLink>
 
-            <RouterLink
-              class="menu-item"
-              to="/admin/courses"
-              :class="{ active: route.path.includes('/admin/courses') }"
-            >
+            <RouterLink class="menu-item" to="/admin/courses"
+              :class="{ active: route.path.includes('/admin/courses') }">
               <i class="bi bi-journal-code"></i> Cursos
             </RouterLink>
 
-            <RouterLink
-              class="menu-item"
-              to="/admin/videos"
-              :class="{ active: route.path.includes('/admin/videos') }"
-            >
+            <RouterLink class="menu-item" to="/admin/videos" :class="{ active: route.path.includes('/admin/videos') }">
               <i class="bi bi-camera-reels"></i> Vídeos
             </RouterLink>
 
             <!-- USER -->
             <div class="user-area dropdown" v-if="auth.user">
               <a class="user-btn" data-bs-toggle="dropdown">
-                <img
-                  :src="auth.user.image
-                      ? 'http://localhost:8000/storage/' + auth.user.image
-                      : 'https://via.placeholder.com/40?text=U'"
-                  class="avatar"
-                />
+                <img :src="auth.user.image
+                  ? 'http://localhost:8000/storage/' + auth.user.image
+                  : 'https://via.placeholder.com/40?text=U'" class="avatar" />
                 {{ auth.user.name }}
               </a>
 
               <ul class="dropdown-menu dropdown-menu-end glass-dropdown shadow-neon">
-                <li><RouterLink to="/admin/profile" class="dropdown-item">Meu Perfil</RouterLink></li>
-                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <RouterLink to="/admin/profile" class="dropdown-item">Meu Perfil</RouterLink>
+                </li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
                 <li><button @click="auth.logout" class="dropdown-item text-danger">Sair</button></li>
               </ul>
             </div>
