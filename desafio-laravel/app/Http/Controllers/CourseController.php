@@ -28,6 +28,7 @@ class CourseController extends Controller
     {
         $user = User::with('roles')->find(Auth::id());
 
+
         if ($user->hasRole('teacher')) {
             return response()->json([
                 'my_courses'  => $this->repo->allForUser($user->id),
@@ -135,6 +136,16 @@ class CourseController extends Controller
 
         return response()->json(['message' => 'Course deleted']);
     }
+
+
+    public function publicList()
+    {
+        return Course::active()
+            ->select('id', 'title', 'description', 'course_image as image')
+            ->orderBy('id', 'desc')
+            ->get();
+    }
+
 
     /**
      * Listar vídeos do curso

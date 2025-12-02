@@ -14,6 +14,9 @@ use App\Http\Controllers\CreateTeacherController;
 |--------------------------------------------------------------------------
 */
 
+
+Route::get('/public/courses', [CourseController::class, 'publicList']);
+
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
