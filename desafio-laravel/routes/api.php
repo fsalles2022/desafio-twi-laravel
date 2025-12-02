@@ -8,15 +8,15 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CreateTeacherController;
 
 
+/* ROTAS PUBLICAS */
+
+Route::get('/public/courses', [CourseController::class, 'publicList']);
+
 /*
 |--------------------------------------------------------------------------
 | AUTH
 |--------------------------------------------------------------------------
 */
-
-
-Route::get('/public/courses', [CourseController::class, 'publicList']);
-
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);

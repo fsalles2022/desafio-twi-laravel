@@ -141,7 +141,7 @@ class CourseController extends Controller
     public function publicList()
     {
         return Course::active()
-            ->select('id', 'title', 'description', 'course_image as image')
+            ->select('id', 'title', 'description', 'course_image as image', 'slug')
             ->orderBy('id', 'desc')
             ->get();
     }
