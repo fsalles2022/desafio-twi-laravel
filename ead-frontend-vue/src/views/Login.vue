@@ -12,7 +12,9 @@
 
         <!-- Navegação Desktop -->
         <ul class="nav-links d-none d-md-flex">
-          <li><RouterLink to="/" class="nav-item">Home</RouterLink></li>
+          <li>
+            <RouterLink to="/" class="nav-item">Home</RouterLink>
+          </li>
           <li><a href="#courses" class="nav-item">Cursos</a></li>
           <li><a href="#destaques" class="nav-item">Destaques</a></li>
 
@@ -155,13 +157,15 @@ const login = async () => {
   color: #e2e2e2;
   text-decoration: none;
 }
+
 .mobile-item:hover {
   color: #00eaff;
 }
 
 /* LOGIN PAGE */
 .login-wrapper {
-  padding-top: 120px; /* evita encostar na navbar */
+  padding-top: 120px;
+  /* evita encostar na navbar */
   min-height: 90vh;
   display: flex;
   align-items: center;
@@ -172,8 +176,7 @@ const login = async () => {
 .background {
   position: absolute;
   inset: 0;
-  background: url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80")
-    center/cover no-repeat fixed;
+  background: url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat fixed;
   filter: brightness(0.6);
   animation: moveBg 20s ease-in-out infinite alternate;
   z-index: 0;
@@ -198,6 +201,7 @@ input {
   padding: 12px;
   border-radius: 8px;
 }
+
 button {
   width: 100%;
   padding: 12px;
@@ -210,12 +214,44 @@ button {
 
 /* Efeitos */
 @keyframes moveBg {
-  from { transform: scale(1); }
-  to { transform: scale(1.1); }
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.1);
+  }
 }
+
 @keyframes floaty {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
 }
+
+html,
+body,
+.login-wrapper {
+  overflow-x: hidden !important;
+}
+
+.neo-navbar {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.background {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+
 </style>
