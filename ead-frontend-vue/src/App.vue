@@ -4,10 +4,10 @@ import { RouterView } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 
 // layouts
-import Home from './views/Home.vue'
 import AdminLayout from './components/AdminLayout.vue'
 import TeacherLayout from './components/TeacherLayout.vue'
 import StudentLayout from './components/StudentLayout.vue'
+import PublicLayout from './components/PublicLayout.vue'
 
 const auth = useAuthStore()
 const loading = ref(true)
@@ -24,7 +24,7 @@ const layoutComponent = computed(() => {
   if (loading.value) return null
 
   const user = auth.user
-  if (!user) return Home
+  if (!user) return PublicLayout
 
   const roles = user.roles || []
 

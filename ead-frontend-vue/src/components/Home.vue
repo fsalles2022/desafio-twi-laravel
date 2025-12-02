@@ -11,14 +11,19 @@
 
       <!-- Navegação Desktop -->
       <ul class="nav-links d-none d-md-flex">
-        <li><RouterLink to="/" class="nav-item">Home</RouterLink></li>
+        <li>
+          <RouterLink to="/" class="nav-item">Home</RouterLink>
+        </li>
         <li><a href="#courses" class="nav-item">Cursos</a></li>
         <li><a href="#destaques" class="nav-item">Destaques</a></li>
 
-        <RouterLink to="/login" class="btn-neo-nav">
-          Entrar
-        </RouterLink>
+        <li>
+          <RouterLink to="/login" class="btn-neo-nav">
+            Entrar
+          </RouterLink>
+        </li>
       </ul>
+
 
       <!-- Botão Mobile -->
       <div class="menu-btn d-md-none" @click="menuOpen = !menuOpen">
@@ -83,8 +88,7 @@
               <div class="img-container">
                 <img
                   :src="curso.image ? 'http://localhost:8000/storage/' + curso.image : 'https://picsum.photos/600/400'"
-                  class="futuristic-img"
-                />
+                  class="futuristic-img" />
               </div>
 
               <!-- CONTEÚDO -->
@@ -343,12 +347,20 @@ function resetCard(e) {
   box-shadow: 0 0 25px rgba(0, 200, 255, 0.4);
 }
 
-/* ===== FUTURISTIC IMAGES ===== */
-.futuristic-img {
-  height: 200px;
-  object-fit: cover;
-  border-radius: 16px 16px 0 0;
+.img-container {
+  width: 100%;
+  aspect-ratio: 16/9; /* evita estourar sem precisar de height fixa */
+  overflow: hidden;
+  border-radius: 14px;
+  position: relative;
 }
+
+.futuristic-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 
 /* ===== SECTION TITLES ===== */
 .section-title {
