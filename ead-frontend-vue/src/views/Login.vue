@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="page-wrapper">
     <!-- NAVBAR FUTURISTA -->
     <nav class="neo-navbar">
       <div class="container d-flex align-items-center justify-content-between">
@@ -15,9 +15,6 @@
           <li>
             <RouterLink to="/" class="nav-item">Home</RouterLink>
           </li>
-          <li><a href="#courses" class="nav-item">Cursos</a></li>
-          <li><a href="#destaques" class="nav-item">Destaques</a></li>
-
           <li>
             <RouterLink to="/login" class="btn-neo-nav active">
               Entrar
@@ -42,7 +39,6 @@
 
     <!-- LOGIN PAGE -->
     <div class="login-wrapper">
-
       <div class="background"></div>
 
       <div class="login-card">
@@ -85,7 +81,21 @@ const login = async () => {
 </script>
 
 <style scoped>
-/* NAVBAR — mantendo seu estilo futurista */
+/* TRAVA ABSOLUTA DE SCROLL LATERAL */
+:global(html, body, #app) {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden !important;
+  width: 100%;
+}
+
+/* Wrapper geral */
+.page-wrapper {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* NAVBAR */
 .neo-navbar {
   width: 100%;
   position: fixed;
@@ -139,17 +149,15 @@ const login = async () => {
 .btn-neo-nav.active {
   background: #00eaff;
   color: #000 !important;
-  text-shadow: none;
 }
 
-/* MOBILE NAV */
+/* MOBILE */
 .mobile-menu {
-  background: rgba(20, 20, 30, 0.9);
+  background: rgba(20, 20, 30, 0.95);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .mobile-item {
@@ -158,25 +166,23 @@ const login = async () => {
   text-decoration: none;
 }
 
-.mobile-item:hover {
-  color: #00eaff;
-}
-
-/* LOGIN PAGE */
+/* LOGIN */
 .login-wrapper {
   padding-top: 120px;
-  /* evita encostar na navbar */
-  min-height: 90vh;
+  height: 100vh;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
+  /* <- MATADOR DAS DUAS BARRAS */
 }
 
 .background {
   position: absolute;
   inset: 0;
-  background: url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat fixed;
+  background: url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
   filter: brightness(0.6);
   animation: moveBg 20s ease-in-out infinite alternate;
   z-index: 0;
@@ -185,8 +191,7 @@ const login = async () => {
 .login-card {
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 15px;
   padding: 2rem;
   width: 100%;
@@ -212,7 +217,7 @@ button {
   font-weight: 600;
 }
 
-/* Efeitos */
+/* ANIMAÇÕES */
 @keyframes moveBg {
   from {
     transform: scale(1);
@@ -236,22 +241,4 @@ button {
     transform: translateY(0);
   }
 }
-
-html,
-body,
-.login-wrapper {
-  overflow-x: hidden !important;
-}
-
-.neo-navbar {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-.background {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-
 </style>

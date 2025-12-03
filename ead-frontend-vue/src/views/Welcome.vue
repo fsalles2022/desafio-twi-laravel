@@ -90,7 +90,7 @@ const auth = useAuthStore()
   position: absolute;
   width: 100%;
   height: 2px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(233, 104, 11, 0.1);
   top: 0;
   animation: scan 6s linear infinite;
   opacity: 0.6;
@@ -118,7 +118,7 @@ const auth = useAuthStore()
   border-radius: 25px;
   backdrop-filter: blur(14px);
   border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 0 40px rgba(30, 0, 90, 0.4), inset 0 0 25px rgba(255,255,255,0.05);
+  box-shadow: 0 0 40px rgba(219, 219, 7, 0.4), inset 0 0 25px rgba(255,255,255,0.05);
   animation: fadeIn 0.8s ease-out;
 }
 

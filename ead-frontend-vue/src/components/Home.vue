@@ -103,17 +103,19 @@
             </div>
           </div>
         </div>
-
       </div>
     </section>
 
     <!-- CTA -->
     <section class="cta-section text-center text-white py-5">
       <h2 class="fw-bold glow-soft">Pronto para Começar?</h2>
-      <p class="lead mt-2">Entre agora e transforme sua carreira na programação.</p>
+      <p class="lead mt-2 text-white">Entre agora e transforme sua carreira na programação.</p>
 
-      <RouterLink to="/login" class="btn-neo-big">Vamos lá 🚀</RouterLink>
+      <RouterLink to="/login" class="btn-neo-big text-white">Vamos lá 🚀</RouterLink>
     </section>
+
+    <!-- Footer -->
+    <Footer />
 
   </div>
 </template>
@@ -121,6 +123,7 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import axios from "axios"
+import Footer from '../components/Footer.vue'
 
 const menuOpen = ref(false)
 const cursos = ref([])
@@ -349,7 +352,8 @@ function resetCard(e) {
 
 .img-container {
   width: 100%;
-  aspect-ratio: 16/9; /* evita estourar sem precisar de height fixa */
+  aspect-ratio: 16/9;
+  /* evita estourar sem precisar de height fixa */
   overflow: hidden;
   border-radius: 14px;
   position: relative;

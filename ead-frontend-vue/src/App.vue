@@ -4,9 +4,9 @@ import { RouterView } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 
 // layouts
-import AdminLayout from './components/AdminLayout.vue'
-import TeacherLayout from './components/TeacherLayout.vue'
-import StudentLayout from './components/StudentLayout.vue'
+import AdminLayout from './layouts/AdminLayout.vue'
+import TeacherLayout from './layouts/TeacherLayout.vue'
+import StudentLayout from './layouts/StudentLayout.vue'
 import PublicLayout from './components/PublicLayout.vue'
 
 const auth = useAuthStore()

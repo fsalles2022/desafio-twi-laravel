@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import Footer from './Footer.vue'
+import Footer from '../components/Footer.vue'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
