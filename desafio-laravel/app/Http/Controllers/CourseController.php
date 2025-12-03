@@ -150,19 +150,35 @@ class CourseController extends Controller
     /**
      * Listar vídeos do curso
      */
+
     public function videos(Course $course)
     {
         $user = User::with('roles')->find(Auth::id());
 
-        if ($user->hasRole('teacher') || $user->enrolledCourses->contains($course->id)) {
-            return response()->json([
-                'course' => $course,
-                'videos' => $course->videos
-            ]);
+        // Verifica se está matriculado
+        if (!$user->hasRole('teacher') && !$user->enrolledCourses->contains($course->id)) {
+            return response()->json(['error' => 'Not enrolled'], 403);
         }
 
-        return response()->json(['error' => 'Not enrolled'], 403);
+        $videos = $course->videos->map(function ($video) use ($user, $course) {
+            return [
+                'id' => $video->id,
+                'title' => $video->title,
+                'description' => $video->description,
+                'filename' => $video->filename,
+                'watched' => $user->watchedVideos()
+                    ->where('video_id', $video->id)
+                    ->where('course_id', $course->id)
+                    ->exists()
+            ];
+        });
+
+        return response()->json([
+            'course' => $course,
+            'videos' => $videos
+        ]);
     }
+
 
     /**
      * Matricular aluno

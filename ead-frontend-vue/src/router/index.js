@@ -8,18 +8,27 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
 
+    // =========================
     // PÚBLICAS
+    // =========================
     { path: '/', name: 'home', component: Home },
     { path: '/login', name: 'login', component: Login },
 
-    // REGISTRO DE USUÁRIOS
     {
       path: '/register',
       name: 'register',
       component: () => import('../views/Register.vue'),
     },
 
-    // PERFIL DO USUÁRIO
+    {
+      path: '/welcome',
+      name: 'welcome',
+      component: () => import('../views/Welcome.vue'),
+    },
+
+    // =========================
+    // PERFIL
+    // =========================
     {
       path: '/profile',
       name: 'profile',
@@ -27,17 +36,21 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-    // DASHBOARD ADMIN
+    // =========================
+    // ADMIN
+    // =========================
     {
       path: '/admin/dashboard',
       name: 'admin-dashboard',
       component: () => import('../views/admin/Dashboard.vue'),
+      meta: { requiresAuth: true },
     },
 
     {
       path: '/admin/profile',
       name: 'admin-profile',
       component: () => import('../views/admin/Profile.vue'),
+      meta: { requiresAuth: true },
     },
 
     {
@@ -47,19 +60,54 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-    // CURSOS DOS ALUNOS
+    // =========================
+    // PROFESSOR
+    // =========================
     {
-      path: '/videos',
-      name: 'videos',
-      component: Videos,
+      path: '/teacher/dashboard',
+      name: 'teacher-dashboard',
+      component: () => import('../views/admin/Dashboard.vue'),
       meta: { requiresAuth: true },
     },
 
-    // CURSOS PROFESSOR
     {
       path: '/teacher/courses',
       name: 'teacher-courses',
       component: () => import('../views/teacher/CourseList.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    // =========================
+    // ALUNO (STUDENT)
+    // =========================
+    {
+      path: '/student/dashboard',
+      name: 'student-dashboard',
+      component: () => import('../views/student/Dashboard.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/student/courses',
+      name: 'student-courses',
+      component: () => import('../views/student/CourseList.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/student/my-courses',
+      name: 'student-my-courses',
+      component: () => import('../views/student/MyCourses.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    // =========================
+    // VÍDEOS / CURSO
+    // =========================
+    {
+      path: '/videos',
+      name: 'videos',
+      component: Videos,
       meta: { requiresAuth: true },
     },
 
@@ -70,19 +118,9 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-    {
-      path: '/teacher/dashboard',
-      name: 'teacher-dashboard',
-      component: () => import('../views/teacher/Dashboard.vue'),
-    },
-
-    {
-      path: '/welcome',
-      name: 'welcome',
-      component: () => import('../views/Welcome.vue'),
-    },
-
+    // =========================
     // 404
+    // =========================
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
@@ -91,7 +129,9 @@ const router = createRouter({
   ],
 })
 
-// Middleware de autenticação
+// =========================
+// GUARD DE AUTENTICAÇÃO
+// =========================
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
 

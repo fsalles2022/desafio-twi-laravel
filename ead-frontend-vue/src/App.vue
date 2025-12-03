@@ -7,7 +7,7 @@ import { useAuthStore } from './stores/auth'
 import AdminLayout from './layouts/AdminLayout.vue'
 import TeacherLayout from './layouts/TeacherLayout.vue'
 import StudentLayout from './layouts/StudentLayout.vue'
-import PublicLayout from './components/PublicLayout.vue'
+import PublicLayout from './layouts/PublicLayout.vue'
 
 const auth = useAuthStore()
 const loading = ref(true)

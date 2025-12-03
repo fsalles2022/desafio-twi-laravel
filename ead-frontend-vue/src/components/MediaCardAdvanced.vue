@@ -5,6 +5,9 @@ const props = defineProps({
   media: Object
 })
 
+const emit = defineEmits(['toggleWatched'])
+
+
 const hover = ref(false)
 
 const isAudio = computed(() =>
@@ -21,19 +24,11 @@ const mediaType = computed(() => {
 <template>
   <div class="col-md-6 col-lg-4 mb-4">
     <div class="card shadow-sm h-100 media-card-advanced">
-      
+
       <!-- PLAYER DE ÁUDIO OU VÍDEO -->
-      <component
-        :is="isAudio ? 'audio' : 'video'"
-        controls
-        class="card-img-top"
-        :width="isAudio ? undefined : 720"
-        :height="isAudio ? undefined : 360"
-        :muted="!isAudio"
-        preload="metadata"
-        @mouseover="hover = true"
-        @mouseleave="hover = false"
-      >
+      <component :is="isAudio ? 'audio' : 'video'" controls class="card-img-top" :width="isAudio ? undefined : 720"
+        :height="isAudio ? undefined : 360" :muted="!isAudio" preload="metadata" @mouseover="hover = true"
+        @mouseleave="hover = false">
         <!-- 👉 AQUI AGORA É SEMPRE media.url -->
         <source :src="media.url" :type="mediaType" />
         Seu navegador não suporta este formato.
@@ -48,6 +43,11 @@ const mediaType = computed(() => {
             ⬇️ Baixar
           </a>
         </div>
+        <button class="btn btn-sm w-100 mt-2" :class="media.watched ? 'btn-success' : 'btn-outline-primary'"
+          @click="emit('toggleWatched', media)">
+          {{ media.watched ? '✅ Assistido' : '▶ Marcar como Assistido' }}
+        </button>
+
       </div>
 
     </div>

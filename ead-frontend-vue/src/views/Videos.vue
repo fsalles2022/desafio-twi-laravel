@@ -7,7 +7,8 @@
     </div>
 
     <div v-else-if="videos.length" class="row g-4">
-      <MediaCardAdvanced v-for="v in videos" :key="v.id" :media="v" />
+      <MediaCardAdvanced v-for="v in videos" :key="v.id" :media="v" @toggleWatched="toggleWatched" />
+
     </div>
 
     <div v-else class="text-muted text-center">
@@ -33,7 +34,6 @@ const fetchVideos = async () => {
       { headers: { Authorization: `Bearer ${auth.token}` } }
     )
 
-    // Mapeia cada vídeo adicionando type e url para streaming
     videos.value = res.data.map(v => ({
       ...v,
       type: getMimeType(v.filename),
@@ -46,12 +46,35 @@ const fetchVideos = async () => {
   }
 }
 
+// ✅ FUNÇÃO DE MARCAR / DESMARCAR ASSISTIDO
+const toggleWatched = async (video) => {
+  try {
+    if (!video.watched) {
+      await axios.post(
+        `http://localhost:8000/api/videos/${video.id}/watched`,
+        {},
+        { headers: { Authorization: `Bearer ${auth.token}` } }
+      )
+      video.watched = true
+    } else {
+      await axios.delete(
+        `http://localhost:8000/api/videos/${video.id}/watched`,
+        { headers: { Authorization: `Bearer ${auth.token}` } }
+      )
+      video.watched = false
+    }
+  } catch (err) {
+    console.error(err)
+    alert('Erro ao atualizar status do vídeo')
+  }
+}
+
 // Função para definir tipo MIME do arquivo
 const getMimeType = (filename) => {
   const ext = filename.split('.').pop().toLowerCase()
   if (['mp4', 'mov', 'avi'].includes(ext)) return 'video/mp4'
   if (['mp3'].includes(ext)) return 'audio/mp3'
-  if (['jpg','jpeg','png','webp'].includes(ext)) return 'image/' + ext
+  if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) return 'image/' + ext
   return 'application/octet-stream'
 }
 

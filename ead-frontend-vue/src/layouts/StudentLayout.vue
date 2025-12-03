@@ -1,95 +1,243 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import Footer from '../components/Footer.vue'
-import { useAuthStore } from '../stores/auth'
+import { RouterLink, RouterView, useRoute } from "vue-router";
+import Footer from "../components/Footer.vue"
+import { useAuthStore } from "../stores/auth";
 
-const auth = useAuthStore()
-
-// função para obter URL da imagem do usuário ou fallback
-const userImage = (user) => {
-  return user?.image
-    ? `http://localhost:8000/storage/${user.image}` // ajuste conforme seu storage
-    : 'https://via.placeholder.com/40?text=User'   // placeholder se não houver imagem
-}
+const auth = useAuthStore();
+const route = useRoute();
 </script>
-
 <template>
-  <div class="d-flex flex-column min-vh-100 bg-light text-dark">
+  <div class="layout-wrapper">
 
-    <!-- Header -->
-    <header class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-      <div class="container">
-        <RouterLink to="/" class="navbar-brand fw-bold text-uppercase d-flex align-items-center">
-          🎬 DEVNEST
-          <span class="fs-6 ms-2 fw-normal">Cursos Profissionalizantes em Laravel</span>
-        </RouterLink>
+    <!-- LOADING -->
+    <div v-if="auth.user === null" class="loading-screen">
+      <div class="cyber-loader"></div>
+    </div>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul class="navbar-nav align-items-center gap-2">
+    <!-- LAYOUT -->
+    <template v-else>
 
-            <li class="nav-item">
-              <RouterLink to="/home" class="nav-link text-white fw-semibold">Início</RouterLink>
-            </li>
-            <li class="nav-item">
-              <RouterLink to="/videos" class="nav-link text-white fw-semibold">Vídeos</RouterLink>
-            </li>
-            <li class="nav-item">
-              <RouterLink to="/courses" class="nav-link text-white fw-semibold">Meus Cursos</RouterLink>
-            </li>
-            <li class="nav-item">
-              <RouterLink to="/sobre" class="nav-link text-white fw-semibold">Sobre</RouterLink>
-            </li>
-            <li class="nav-item">
-              <RouterLink to="/contato" class="nav-link text-white fw-semibold">Contato</RouterLink>
-            </li>
+      <!-- ==== HEADER FUTURISTA ==== -->
+      <header class="admin-header glass-nav shadow-neon">
+        <div class="container d-flex justify-content-between align-items-center">
 
-            <!-- Usuário logado -->
-            <li class="nav-item dropdown" v-if="auth.user">
-              <a class="nav-link dropdown-toggle d-flex align-items-center text-white fw-semibold" href="#"
-                id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                <img :src="userImage(auth.user)" class="rounded-circle me-2" width="35" height="35" alt="User Image" />
-                Olá, <strong>{{ auth.user.name }}</strong>!
+          <!-- LOGO -->
+          <RouterLink to="/home" class="logo">
+            <i class="bi bi-mortarboard-fill me-2"></i> DEVNEST • ALUNO
+          </RouterLink>
+
+          <!-- MENU -->
+          <nav class="menu">
+
+            <RouterLink class="menu-item" to="/welcome" :class="{ active: route.path === '/welcome' }">
+              <i class="bi bi-plug"></i>welcome
+            </RouterLink>
+
+
+            <RouterLink class="menu-item" to="/student/dashboard"
+              :class="{ active: route.path === '/student/dashboard' }">
+              <i class="bi bi-speedometer2"></i> Dashboard
+            </RouterLink>
+
+
+            <RouterLink class="menu-item" to="/student/courses"
+              :class="{ active: route.path.includes('/student/courses') }">
+              <i class="bi bi-journal-code"></i> Cursos
+            </RouterLink>
+
+            <RouterLink class="menu-item" to="/student/my-courses"
+              :class="{ active: route.path.includes('/student/my-courses') }">
+              <i class="bi bi-bookmark-star"></i> Meus Cursos
+            </RouterLink>
+
+            <!-- USER -->
+            <div class="user-area dropdown" v-if="auth.user">
+              <a class="user-btn" data-bs-toggle="dropdown">
+                <img :src="auth.user.image
+                  ? 'http://localhost:8000/storage/' + auth.user.image
+                  : 'https://via.placeholder.com/40?text=U'" class="avatar" />
+                {{ auth.user.name }}
               </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+
+              <ul class="dropdown-menu dropdown-menu-end glass-dropdown shadow-neon">
                 <li>
-                  <RouterLink to="/profile" class="dropdown-item d-flex align-items-center">
-                    <img :src="userImage(auth.user)" class="rounded-circle me-2" width="30" height="30"
-                      alt="User Image" />
+                  <RouterLink to="/profile" class="dropdown-item">
                     Meu Perfil
                   </RouterLink>
                 </li>
                 <li>
-                  <hr class="dropdown-divider" />
+                  <hr class="dropdown-divider">
                 </li>
                 <li>
-                  <button @click="auth.logout" class="dropdown-item text-danger">Sair</button>
+                  <button @click="auth.logout" class="dropdown-item text-danger">
+                    Sair
+                  </button>
                 </li>
               </ul>
-            </li>
+            </div>
 
-            <!-- Não logado -->
-            <li class="nav-item" v-else>
-              <RouterLink to="/login" class="btn btn-outline-light btn-sm px-3 fw-semibold">
-                Entrar
-              </RouterLink>
-            </li>
-
-          </ul>
+          </nav>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <!-- Conteúdo -->
-    <main class="flex-grow-1 py-5">
-      <div class="container">
-        <RouterView />
-      </div>
-    </main>
+      <!-- CONTEÚDO -->
+      <main class="content-area">
+        <div class="container">
+          <RouterView />
+        </div>
+      </main>
 
-    <!-- Footer -->
-    <Footer />
+      <Footer />
+    </template>
   </div>
 </template>
+
+<style scoped>
+/* ===========================
+    TEMA FUTURISTA
+=========================== */
+.layout-wrapper {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0d0d1a, #000);
+  color: #d9eaff;
+  overflow-x: hidden;
+}
+
+/* ===========================
+    HEADER (GLASS + NEON)
+=========================== */
+.admin-header {
+  padding: 18px 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(15px);
+}
+
+.glass-nav {
+  background: rgba(20, 20, 40, 0.55);
+  border-bottom: 1px solid rgba(90, 120, 255, 0.2);
+}
+
+.shadow-neon {
+  box-shadow: 0 0 20px #3b82f6aa, 0 0 40px #9333ea55 inset;
+}
+
+/* LOGO */
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #71c9ff;
+  text-decoration: none;
+  text-shadow: 0 0 10px #00c8ff, 0 0 20px #0099ff;
+  transition: 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* ===========================
+    MENU
+=========================== */
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.menu-item {
+  color: #b9ceff;
+  font-weight: 600;
+  padding-bottom: 4px;
+  position: relative;
+  text-decoration: none;
+  transition: 0.22s ease-out;
+}
+
+.menu-item:hover {
+  color: #fff;
+  text-shadow: 0 0 8px #3b82f6;
+  transform: translateY(-2px);
+}
+
+.menu-item.active {
+  color: #ffffff;
+  text-shadow: 0 0 12px #60a5fa;
+}
+
+.menu-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #3b82f6, #9333ea);
+}
+
+/* ===========================
+    USER AREA
+=========================== */
+.user-area {
+  position: relative;
+}
+
+.user-btn {
+  color: #e2eafd;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #3b82f6;
+}
+
+.glass-dropdown {
+  background: rgba(20, 20, 40, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 100, 255, 0.25);
+}
+
+/* ===========================
+    LOADING FUTURISTA
+=========================== */
+.loading-screen {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cyber-loader {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #0ff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  box-shadow: 0 0 15px #0ff, 0 0 30px #00f5ff inset;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===========================
+    CONTEÚDO
+=========================== */
+.content-area {
+  padding: 60px 0;
+}
+</style>
