@@ -238,221 +238,234 @@
   </div>
 </template>
 
+
+
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import axios from 'axios';
-import { useAuthStore } from '../../stores/auth';
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import { useAuthStore } from '../../stores/auth'
 
-const auth = useAuthStore();
+const auth = useAuthStore()
 
-const loading = ref(true);
-const courses = ref([]);
-const videos = ref([]);
-const studentsCount = ref(0);
-const chartCanvas = ref(null);
+const loading = ref(true)
+const courses = ref([])
+const videos = ref([])
+const studentsCount = ref(0)
 
-// modal states
-const showCourseModal = ref(false);
-const editingCourse = ref(null);
-const courseForm = ref({ title: '', description: '', status: 'active', course_image: null });
-const courseLoading = ref(false);
-const courseError = ref('');
+// ===== MODAIS =====
+const showCourseModal = ref(false)
+const showVideoModal = ref(false)
 
-const showVideoModal = ref(false);
-const editingVideo = ref(null);
-const videoForm = ref({ title: '', description: '', course_id: '', file: null });
-const videoLoading = ref(false);
-const videoError = ref('');
+const editingCourse = ref(null)
+const editingVideo = ref(null)
 
-// helper to build auth header
-function authHeaders() {
-  return { headers: { Authorization: `Bearer ${auth.token}` } };
-}
+const courseForm = ref({
+  title: '',
+  description: '',
+  status: 'active',
+  course_image: null
+})
 
-/** LOAD DATA */
+const videoForm = ref({
+  title: '',
+  description: '',
+  course_id: '',
+  file: null,
+  url: ''
+})
+
+const courseLoading = ref(false)
+const videoLoading = ref(false)
+
+const courseError = ref('')
+const videoError = ref('')
+
+// ===== HEADERS =====
+const authHeaders = () => ({
+  headers: { Authorization: `Bearer ${auth.token}` }
+})
+
+// ===== LOAD DASHBOARD (AJUSTADO) =====
 async function loadDashboard() {
-  loading.value = true;
+  loading.value = true
   try {
-    // courses
-    const coursesResponse = await axios.get('http://localhost:8000/api/courses', authHeaders());
+    const res = await axios.get(
+      'http://localhost:8000/api/teacher/dashboard',
+      authHeaders()
+    )
 
-    let fetched = coursesResponse.data.my_courses || coursesResponse.data || [];
-    // ensure array
-    if (!Array.isArray(fetched)) fetched = [];
-
-    // only teacher's courses
-    courses.value = fetched.filter(c => c.user_id === auth.user.id);
-
-    // videos (all) then filter by course ids
-    const videosResponse = await axios.get('http://localhost:8000/api/videos', authHeaders());
-    const vids = Array.isArray(videosResponse.data) ? videosResponse.data : [];
-    const courseIds = courses.value.map(c => c.id);
-    videos.value = vids.filter(v => courseIds.includes(v.course_id));
-
-    // students count
-    studentsCount.value = courses.value.reduce((acc, course) => acc + (course.students?.length || 0), 0);
+    courses.value = res.data.courses || []
+    videos.value = res.data.videos || []
+    studentsCount.value = res.data.students_total || 0
 
   } catch (err) {
-    console.error('Erro ao carregar dashboard:', err);
+    console.error('Erro dashboard:', err)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
-/** COURSE CRUD */
+// ===== COURSE MODAL =====
 function openNewCourseModal() {
-  editingCourse.value = null;
-  courseForm.value = { title: '', description: '', status: 'active', course_image: null };
-  courseError.value = '';
-  showCourseModal.value = true;
+  editingCourse.value = null
+  courseForm.value = { title: '', description: '', status: 'active', course_image: null }
+  showCourseModal.value = true
 }
 
 function openEditCourseModal(course) {
-  editingCourse.value = course;
+  editingCourse.value = course
   courseForm.value = {
-    title: course.title || '',
-    description: course.description || '',
-    status: course.status || 'active',
-    course_image: null,
-  };
-  courseError.value = '';
-  showCourseModal.value = true;
+    title: course.title,
+    description: course.description,
+    status: course.status,
+    course_image: null
+  }
+  showCourseModal.value = true
 }
 
 function closeCourseModal() {
-  showCourseModal.value = false;
+  showCourseModal.value = false
 }
 
 function onCourseImageChange(e) {
-  const file = e.target.files?.[0] || null;
-  courseForm.value.course_image = file;
+  courseForm.value.course_image = e.target.files[0]
 }
 
 async function saveCourse() {
-  courseError.value = '';
-  courseLoading.value = true;
+  courseError.value = ''
+  courseLoading.value = true
 
   try {
-    const fd = new FormData();
-    fd.append('title', courseForm.value.title);
-    fd.append('description', courseForm.value.description || '');
-    fd.append('status', courseForm.value.status || 'active');
-    if (courseForm.value.course_image) fd.append('course_image', courseForm.value.course_image);
+    const fd = new FormData()
+    fd.append('title', courseForm.value.title)
+    fd.append('description', courseForm.value.description)
+    fd.append('status', courseForm.value.status)
 
-    if (editingCourse.value) {
-      // use _method=PUT to support file upload via POST
-      fd.append('_method', 'PUT');
-      await axios.post(`http://localhost:8000/api/courses/${editingCourse.value.id}`, fd, authHeaders());
-    } else {
-      await axios.post('http://localhost:8000/api/courses', fd, authHeaders());
+    if (courseForm.value.course_image) {
+      fd.append('course_image', courseForm.value.course_image)
     }
 
-    // reload lists
-    await loadDashboard();
-    closeCourseModal();
-  } catch (err) {
-    console.error('Erro ao salvar curso:', err);
-    courseError.value = err?.response?.data?.message || 'Falha ao salvar curso';
+    if (editingCourse.value) {
+      fd.append('_method', 'PUT')
+      await axios.post(
+        `http://localhost:8000/api/courses/${editingCourse.value.id}`,
+        fd,
+        authHeaders()
+      )
+    } else {
+      await axios.post(
+        'http://localhost:8000/api/courses',
+        fd,
+        authHeaders()
+      )
+    }
+
+    await loadDashboard()
+    closeCourseModal()
+  } catch (e) {
+    courseError.value = 'Erro ao salvar curso'
   } finally {
-    courseLoading.value = false;
+    courseLoading.value = false
   }
 }
 
 async function confirmDeleteCourse(course) {
-  const ok = confirm(`Confirma exclusão do curso "${course.title}"?`);
-  if (!ok) return;
-  try {
-    await axios.delete(`http://localhost:8000/api/courses/${course.id}`, authHeaders());
-    await loadDashboard();
-  } catch (err) {
-    console.error('Erro ao deletar curso:', err);
-    alert('Falha ao deletar curso');
-  }
+  if (!confirm(`Excluir "${course.title}"?`)) return
+  await axios.delete(
+    `http://localhost:8000/api/courses/${course.id}`,
+    authHeaders()
+  )
+  loadDashboard()
 }
 
-/** VIDEO CRUD */
+// ===== VIDEO MODAL =====
 function openNewVideoModal() {
-  editingVideo.value = null;
-  videoForm.value = { title: '', description: '', course_id: courses.value[0]?.id || '', file: null };
-  videoError.value = '';
-  showVideoModal.value = true;
+  editingVideo.value = null
+  videoForm.value = {
+    title: '',
+    description: '',
+    course_id: courses.value[0]?.id || '',
+    file: null,
+    url: ''
+  }
+  showVideoModal.value = true
 }
 
 function openEditVideoModal(video) {
-  editingVideo.value = video;
+  editingVideo.value = video
   videoForm.value = {
-    title: video.title || '',
-    description: video.description || '',
-    course_id: video.course_id || (courses.value[0]?.id || ''),
+    title: video.title,
+    description: video.description,
+    course_id: video.course_id,
     file: null,
-  };
-  videoError.value = '';
-  showVideoModal.value = true;
+    url: video.url || ''
+  }
+  showVideoModal.value = true
 }
 
 function closeVideoModal() {
-  showVideoModal.value = false;
+  showVideoModal.value = false
 }
 
 function onVideoFileChange(e) {
-  const file = e.target.files?.[0] || null;
-  videoForm.value.file = file;
+  videoForm.value.file = e.target.files[0]
 }
 
 async function saveVideo() {
-  videoError.value = '';
-  videoLoading.value = true;
+  videoError.value = ''
+  videoLoading.value = true
 
   try {
-    if (!videoForm.value.course_id) {
-      videoError.value = 'Selecione um curso';
-      return;
+    const fd = new FormData()
+    fd.append('title', videoForm.value.title)
+    fd.append('description', videoForm.value.description)
+    fd.append('course_id', videoForm.value.course_id)
+    fd.append('url', videoForm.value.url)
+
+    if (videoForm.value.file) {
+      fd.append('file', videoForm.value.file)
     }
-    const fd = new FormData();
-    fd.append('title', videoForm.value.title);
-    fd.append('description', videoForm.value.description || '');
-    fd.append('course_id', videoForm.value.course_id);
-    if (videoForm.value.file) fd.append('file', videoForm.value.file);
 
     if (editingVideo.value) {
-      fd.append('_method', 'PUT');
-      await axios.post(`http://localhost:8000/api/videos/${editingVideo.value.id}`, fd, authHeaders());
+      fd.append('_method', 'PUT')
+      await axios.post(
+        `http://localhost:8000/api/videos/${editingVideo.value.id}`,
+        fd,
+        authHeaders()
+      )
     } else {
-      await axios.post('http://localhost:8000/api/videos', fd, authHeaders());
+      await axios.post(
+        'http://localhost:8000/api/videos',
+        fd,
+        authHeaders()
+      )
     }
 
-    await loadDashboard();
-    closeVideoModal();
-  } catch (err) {
-    console.error('Erro ao salvar vídeo:', err);
-    videoError.value = err?.response?.data?.message || 'Falha ao salvar vídeo';
+    await loadDashboard()
+    closeVideoModal()
+  } catch (e) {
+    videoError.value = 'Erro ao salvar vídeo'
   } finally {
-    videoLoading.value = false;
+    videoLoading.value = false
   }
 }
 
 async function confirmDeleteVideo(video) {
-  const ok = confirm(`Confirma exclusão do vídeo "${video.title}"?`);
-  if (!ok) return;
-  try {
-    await axios.delete(`http://localhost:8000/api/videos/${video.id}`, authHeaders());
-    await loadDashboard();
-  } catch (err) {
-    console.error('Erro ao deletar vídeo:', err);
-    alert('Falha ao deletar vídeo');
-  }
+  if (!confirm(`Excluir "${video.title}"?`)) return
+  await axios.delete(
+    `http://localhost:8000/api/videos/${video.id}`,
+    authHeaders()
+  )
+  loadDashboard()
 }
 
-/** Helpers */
 function courseTitle(id) {
-  const c = courses.value.find(x => x.id === id);
-  return c ? c.title : null;
+  return courses.value.find(c => c.id === id)?.title || '—'
 }
 
-onMounted(() => {
-  loadDashboard();
-});
+onMounted(loadDashboard)
 </script>
+
 
 <style scoped>
 .teacher-dashboard {
