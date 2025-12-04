@@ -156,7 +156,7 @@ class CourseController extends Controller
         $user = User::with('roles')->find(Auth::id());
 
         // Verifica se está matriculado
-        if (!$user->hasRole('teacher') && !$user->enrolledCourses->contains($course->id)) {
+        if (!$user->hasRole('teacher','admin') && !$user->enrolledCourses->contains($course->id)) {
             return response()->json(['error' => 'Not enrolled'], 403);
         }
 
@@ -187,8 +187,8 @@ class CourseController extends Controller
     {
         $user = User::with('roles')->find(Auth::id());
 
-        if ($user->hasRole('teacher')) {
-            return response()->json(['message' => 'Teachers cannot enroll'], 403);
+        if ($user->hasRole('teacher', 'admin')) {
+            return response()->json(['message' => 'Teachers and Admin cannot enroll'], 403);
         }
 
         if ($user->enrolledCourses()->where('course_id', $course->id)->exists()) {
@@ -210,7 +210,9 @@ class CourseController extends Controller
     {
         $user = User::with('roles')->find(Auth::id());
 
-        if (!$user->enrolledCourses()->where('course_id', $courseId)->exists()) {
+        if (
+            !$user->hasAnyRole(['teacher', 'admin']) &&
+            !$user->enrolledCourses()->where('course_id', $courseId)->exists()) {
             return response()->json(['error' => 'Not enrolled'], 403);
         }
 

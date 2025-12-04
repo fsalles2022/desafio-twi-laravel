@@ -146,7 +146,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    Route::middleware(['auth:sanctum', 'role:teacher|admin'])->group(function () {
+    Route::middleware(['role:teacher|admin'])->group(function () {
 
         Route::get('/teacher/stats', function () {
             return [

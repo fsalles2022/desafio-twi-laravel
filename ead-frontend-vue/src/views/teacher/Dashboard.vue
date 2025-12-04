@@ -260,7 +260,7 @@ const courseError = ref('');
 
 const showVideoModal = ref(false);
 const editingVideo = ref(null);
-const videoForm = ref({ title: '', description: '', course_id: '', file: null });
+const videoForm = ref({ title: '', description: '', course_id: '', file: null, url:'' });
 const videoLoading = ref(false);
 const videoError = ref('');
 
