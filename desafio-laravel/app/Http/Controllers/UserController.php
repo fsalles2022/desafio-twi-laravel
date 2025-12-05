@@ -19,6 +19,13 @@ class UserController extends Controller
         $users = User::all();
         return response()->json($users);
     }
+
+    public function allTeachers()
+    {
+        $teachers = User::role('teacher')->get();
+        return response()->json($teachers);
+    }
+
     /**
      * Listar todos os usuários com vídeos
      */
