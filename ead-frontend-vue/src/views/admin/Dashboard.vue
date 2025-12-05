@@ -94,7 +94,14 @@
                 </div>
 
                 <div class="d-flex gap-2 align-items-center">
-                  <span class="badge bg-primary rounded-pill me-2">{{ course.students?.length || 0 }} alunos</span>
+                  <span class="badge bg-primary rounded-pill me-2">
+                    {{ course.students?.length || 0 }} alunos
+                  </span>
+
+                  <span class="badge bg-warning rounded-pill">
+                    Prof: {{ course.teacher?.name|| 'Não definido' }}
+                  </span>
+
 
                   <button class="btn btn-sm btn-outline-primary" @click="openEditCourseModal(course)">Editar</button>
                   <button class="btn btn-sm btn-outline-danger" @click="confirmDeleteCourse(course)">Excluir</button>
