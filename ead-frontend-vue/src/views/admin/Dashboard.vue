@@ -4,7 +4,7 @@
     <!-- TOP BAR (botões grandes) -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="fw-bold">Painel do Professor</h2>
+        <h2 class="fw-bold">Painel de Administrador</h2>
         <p class="text-white m-0">Bem-vindo, <strong>{{ auth.user.name }}</strong></p>
       </div>
 

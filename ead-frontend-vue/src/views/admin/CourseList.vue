@@ -17,7 +17,7 @@
             <p class="text-muted">{{ c.description }}</p>
              <p class="text-muted">Id Curso: {{ c.id }}</p>
 
-            <router-link :to="`/course/${c.id}`" class="btn btn-primary w-100">
+            <router-link :to="`/courses/${c.id}`" class="btn btn-primary w-100">
               Acessar Aulas →
             </router-link>
           </div>
@@ -42,7 +42,7 @@ const courses = ref([]);
 
 const fetchCourses = async () => {
   try {
-    const res = await axios.get("http://localhost:8000/api/public/courses", {
+    const res = await axios.get("http://localhost:8000/api/courses", {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
 
