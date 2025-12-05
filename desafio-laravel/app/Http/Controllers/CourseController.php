@@ -24,38 +24,29 @@ class CourseController extends Controller
     /**
      * Lista cursos do usuário autenticado
      */
-    public function index()
-    {
-        $user = User::with('roles')->find(Auth::id());
+ public function index()
+{
+    $user = User::with('roles')->find(Auth::id());
 
-
-        if ($user->hasRole('teacher')) {
-            return response()->json([
-                'my_courses'  => Course::with('teacher')->orderBy('id', 'desc')->get(), // ✅ TODOS
-                'all_courses' => Course::with('teacher')->orderBy('id', 'desc')->get(), // ✅ TODOS
-            ]);
-        }
-
-
-        if ($user->hasRole('student')) {
-            return response()->json([
-                'my_courses'  => $user->studentCourses()->with('teacher')->get(),
-                'all_courses' => Course::active()->with('teacher')->get(),
-            ]);
-        }
-
-        if ($user->hasRole('admin')) {
-            return response()->json([
-                'my_courses'  => Course::with('teacher')->orderBy('id', 'desc')->get(),
-                'all_courses' => Course::active()->with('teacher')->get(),
-            ]);
-        }
-
-
-
-
-        return response()->json([], 403);
+    // ✅ Teacher e Admin veem tudo
+    if ($user->hasAnyRole(['teacher', 'admin'])) {
+        return response()->json([
+            'my_courses'  => Course::with('teacher')->orderBy('id', 'desc')->get(),
+            'all_courses' => Course::with('teacher')->orderBy('id', 'desc')->get(),
+        ]);
     }
+
+    // ✅ Student vê apenas os seus e os ativos
+    if ($user->hasRole('student')) {
+        return response()->json([
+            'my_courses'  => $user->studentCourses()->with('teacher')->get(),
+            'all_courses' => Course::active()->with('teacher')->get(),
+        ]);
+    }
+
+    return response()->json([], 403);
+}
+
 
     /**
      * Mostrar 1 curso com vídeos e professor
