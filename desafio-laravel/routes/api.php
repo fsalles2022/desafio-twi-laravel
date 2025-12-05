@@ -138,10 +138,11 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(array_values($videos));
     });
 
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::post('/admin/create-teacher', [CreateTeacherController::class, 'createTeacher']);
-        Route::get('/teachers', [CreateTeacherController::class, 'index']); // <--- NECESSÁRIO!
+        Route::get('/admin/teachers', [CreateTeacherController::class, 'index']);
     });
+
 
 
 
