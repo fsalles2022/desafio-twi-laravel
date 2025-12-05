@@ -18,8 +18,6 @@
         <button class="btn btn-warning px-4 py-2 fw-semibold rounded-3" @click="openTeacherModal">
           + Cadastrar Professor
         </button>
-
-
       </div>
     </div>
 
@@ -49,6 +47,17 @@
               <i class="bi bi-people-fill fs-2 opacity-75"></i>
             </div>
             <h1 class="fw-bold mt-3">{{ usersCount }}</h1>
+          </div>
+        </div>
+
+        <!-- NOVO CARD: PROFESSORES -->
+        <div class="col-md-4">
+          <div class="dash-card shadow-sm border-0 p-4 rounded-4 bg-gradient-4 text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="fw-semibold">Professores</h5>
+              <i class="bi bi-person-badge fs-2 opacity-75"></i>
+            </div>
+            <h1 class="fw-bold mt-3">{{ teachersCount }}</h1>
           </div>
         </div>
 
@@ -112,7 +121,6 @@
                     Prof: {{ course.teacher?.name || 'Não definido' }}
                   </span>
 
-
                   <button class="btn btn-sm btn-outline-primary" @click="openEditCourseModal(course)">Editar</button>
                   <button class="btn btn-sm btn-outline-danger" @click="confirmDeleteCourse(course)">Excluir</button>
                 </div>
@@ -152,6 +160,55 @@
           </div>
         </div>
       </div>
+
+      <!-- === NOVA SEÇÃO: LISTA DE PROFESSORES (com editar e deletar) === -->
+      <div class="row mt-3">
+        <div class="col-12">
+          <div class="card shadow-sm border-0 rounded-4 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold m-0">👩‍🏫 Lista de Professores</h5>
+              <div>
+                <!-- você pode adicionar filtros ou botões aqui -->
+              </div>
+            </div>
+
+            <div v-if="teachers.length === 0" class="text-muted mb-3">Nenhum professor encontrado.</div>
+
+            <div v-else class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Foto</th>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Registro</th>
+                    <th class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="teacher in teachers" :key="teacher.id">
+                    <td style="width: 60px;">
+                      <img :src="teacher.image_url || defaultAvatar" alt="avatar" class="rounded-circle" width="48" height="48" />
+                    </td>
+                    <td>{{ teacher.name }}</td>
+                    <td>{{ teacher.email }}</td>
+                    <td class="text-muted small">{{ formatDate(teacher.created_at) }}</td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-sm btn-outline-primary" @click="openEditTeacher(teacher)">Editar</button>
+                        <button class="btn btn-sm btn-outline-danger" @click="deleteTeacher(teacher.id)">Excluir</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- === FIM LISTA DE PROFESSORES === -->
+
     </div>
 
     <!-- ===== COURSE MODAL (custom modern modal) ===== -->
@@ -256,7 +313,7 @@
       </div>
     </div>
 
-    <!-- ===== TEACHER MODAL ===== -->
+    <!-- ===== TEACHER MODAL (Criar) ===== -->
     <div v-if="showTeacherModal" class="modal-backdrop" @click="closeTeacherModal">
       <div class="modal-container" @click.stop>
 
@@ -301,12 +358,50 @@
       </div>
     </div>
 
+    <!-- ===== EDIT TEACHER MODAL (Editar professor existente) ===== -->
+    <div v-if="showEditTeacherModal" class="modal-backdrop" @click="() => showEditTeacherModal = false">
+      <div class="modal-container" @click.stop>
+        <div class="modal-header">
+          <h3>Editar Professor</h3>
+          <button class="btn-close" @click="() => showEditTeacherModal = false">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div v-if="selectedTeacher">
+            <div class="form-group mb-2">
+              <label class="form-label">Nome</label>
+              <input v-model="selectedTeacher.name" class="form-control" />
+            </div>
+
+            <div class="form-group mb-2">
+              <label class="form-label">E-mail</label>
+              <input v-model="selectedTeacher.email" class="form-control" />
+            </div>
+
+            <div class="form-group mb-2">
+              <label class="form-label">Senha (opcional)</label>
+              <input type="password" v-model="selectedTeacher.password" class="form-control" placeholder="Deixe em branco para não alterar" />
+            </div>
+
+            <div v-if="editTeacherError" class="alert alert-danger small">{{ editTeacherError }}</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showEditTeacherModal = false">Cancelar</button>
+          <button class="btn btn-success" :disabled="editTeacherLoading" @click="updateTeacher">
+            <span v-if="editTeacherLoading" class="spinner-border spinner-border-sm me-2"></span>
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../../stores/auth';
 
@@ -318,6 +413,8 @@ const videos = ref([]);
 const studentsCount = ref(0);
 const users = ref([]);        // ✅ TODOS OS USUÁRIOS
 const usersCount = ref(0);   // ✅ TOTAL DE USUÁRIOS
+const teachers = ref([]); // ✅ lista de professores
+const teachersCount = ref(0); // ✅ total de professores
 const chartCanvas = ref(null);
 const showTeacherModal = ref(false)
 
@@ -331,6 +428,13 @@ const teacherForm = ref({
 const teacherLoading = ref(false)
 const teacherError = ref('')
 
+// editar professor
+const selectedTeacher = ref(null)
+const showEditTeacherModal = ref(false)
+const editTeacherLoading = ref(false)
+const editTeacherError = ref('')
+
+const defaultAvatar = 'http://localhost:8000/default-avatar.png' // ajuste se precisar
 
 /** modal states **/
 const showCourseModal = ref(false);
@@ -354,6 +458,15 @@ function onTeacherCreated() {
   alert("Professor criado com sucesso!")
 }
 
+/** UTILITIES */
+function formatDate(date) {
+  if (!date) return '-';
+  try {
+    return new Date(date).toLocaleString();
+  } catch (e) {
+    return date;
+  }
+}
 
 /** LOAD DATA */
 async function loadDashboard() {
@@ -403,6 +516,25 @@ async function loadDashboard() {
 
     console.log('USUÁRIOS:', users.value);
 
+    // ✅ BUSCA SOMENTE PROFESSORES
+    try {
+      const teachersResponse = await axios.get(
+        'http://localhost:8000/api/users/teachers',
+        authHeaders()
+      );
+
+      teachers.value = Array.isArray(teachersResponse.data)
+        ? teachersResponse.data
+        : teachersResponse.data?.data || [];
+
+      teachersCount.value = teachers.value.length;
+      console.log('PROFESSORES:', teachers.value);
+    } catch (errTeachers) {
+      // se houver erro nesta rota, vamos logar mas não interromper o dashboard
+      console.error('Erro ao carregar professores:', errTeachers);
+      teachers.value = [];
+      teachersCount.value = 0;
+    }
 
     // ✅ Soma total de alunos corretamente
     studentsCount.value = courses.value.reduce(
@@ -421,7 +553,64 @@ async function loadDashboard() {
   }
 }
 
+/** FUNÇÕES DE PROFESSORES (LISTAR, EDITAR, DELETAR) */
+async function loadTeachers() {
+  try {
+    const res = await axios.get('http://localhost:8000/api/users/teachers', authHeaders());
+    teachers.value = Array.isArray(res.data) ? res.data : res.data?.data || [];
+    teachersCount.value = teachers.value.length;
+  } catch (err) {
+    console.error('Erro ao carregar professores:', err);
+    teachers.value = [];
+    teachersCount.value = 0;
+  }
+}
 
+function openEditTeacher(teacher) {
+  selectedTeacher.value = { ...teacher, password: '' }; // clone e limpa senha
+  editTeacherError.value = '';
+  showEditTeacherModal.value = true;
+}
+
+async function updateTeacher() {
+  if (!selectedTeacher.value?.id) return;
+  editTeacherLoading.value = true;
+  editTeacherError.value = '';
+
+  try {
+    // Preparar payload (se senha vazia, remover)
+    const payload = { ...selectedTeacher.value };
+    if (!payload.password) delete payload.password;
+
+    // usar post para rota existente (/api/users/{id})
+    await axios.post(`http://localhost:8000/api/users/${payload.id}`, payload, authHeaders());
+
+    showEditTeacherModal.value = false;
+    selectedTeacher.value = null;
+
+    // recarregar listas
+    await loadTeachers();
+    await loadDashboard();
+  } catch (err) {
+    console.error('Erro ao atualizar professor:', err);
+    editTeacherError.value = err?.response?.data?.message || 'Falha ao atualizar professor';
+  } finally {
+    editTeacherLoading.value = false;
+  }
+}
+
+async function deleteTeacher(id) {
+  if (!confirm('Tem certeza que deseja excluir este professor?')) return;
+  try {
+    await axios.delete(`http://localhost:8000/api/users/${id}`, authHeaders());
+    // recarrega
+    await loadTeachers();
+    await loadDashboard();
+  } catch (err) {
+    console.error('Erro ao deletar professor:', err);
+    alert('Falha ao deletar professor');
+  }
+}
 
 /** COURSE CRUD */
 function openNewCourseModal() {
@@ -601,7 +790,9 @@ async function saveTeacher() {
 
     alert('Professor criado com sucesso!')
     closeTeacherModal()
-
+    // recarrega professores
+    await loadTeachers()
+    await loadDashboard()
   } catch (err) {
     console.error('Erro ao criar professor:', err)
     teacherError.value =
@@ -613,8 +804,9 @@ async function saveTeacher() {
   }
 }
 
-onMounted(() => {
-  loadDashboard();
+onMounted(async () => {
+  await loadDashboard();
+  await loadTeachers();
 });
 </script>
 
@@ -634,6 +826,11 @@ onMounted(() => {
 
 .bg-gradient-3 {
   background: linear-gradient(135deg, #424242, #000000);
+}
+
+/* novo gradiente para professores */
+.bg-gradient-4 {
+  background: linear-gradient(135deg, #8e44ad, #6f42c1);
 }
 
 .dash-card {
@@ -695,6 +892,9 @@ onMounted(() => {
   font-size: 22px;
   cursor: pointer;
 }
+
+/* estilos para modal de edição de professor (usa as mesmas classes modal-container, etc.) */
+/* se quiser um modal menor específico, podemos criar classes novas */
 
 /* small UI tweaks */
 .list-group-item {
