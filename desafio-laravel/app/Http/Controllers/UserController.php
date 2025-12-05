@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Storage; // 👈 ADICIONE ISSO
 
 class UserController extends Controller
 {
+
+    public function allUsers()
+    {
+        $users = User::all();
+        return response()->json($users);
+    }
     /**
      * Listar todos os usuários com vídeos
      */

@@ -43,6 +43,16 @@
         </div>
 
         <div class="col-md-4">
+          <div class="dash-card shadow-sm border-0 p-4 rounded-4 bg-gradient-3 text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="fw-semibold">Usuários do Sistema</h5>
+              <i class="bi bi-people-fill fs-2 opacity-75"></i>
+            </div>
+            <h1 class="fw-bold mt-3">{{ usersCount }}</h1>
+          </div>
+        </div>
+
+        <div class="col-md-4">
           <div class="dash-card shadow-sm border-0 p-4 rounded-4 bg-gradient-2 text-white">
             <div class="d-flex justify-content-between align-items-center">
               <h5 class="fw-semibold">Vídeos Enviados</h5>
@@ -99,7 +109,7 @@
                   </span>
 
                   <span class="badge bg-warning rounded-pill">
-                    Prof: {{ course.teacher?.name|| 'Não definido' }}
+                    Prof: {{ course.teacher?.name || 'Não definido' }}
                   </span>
 
 
@@ -306,6 +316,8 @@ const loading = ref(true);
 const courses = ref([]);
 const videos = ref([]);
 const studentsCount = ref(0);
+const users = ref([]);        // ✅ TODOS OS USUÁRIOS
+const usersCount = ref(0);   // ✅ TOTAL DE USUÁRIOS
 const chartCanvas = ref(null);
 const showTeacherModal = ref(false)
 
@@ -320,7 +332,7 @@ const teacherLoading = ref(false)
 const teacherError = ref('')
 
 
-// modal states
+/** modal states **/
 const showCourseModal = ref(false);
 const editingCourse = ref(null);
 const courseForm = ref({ title: '', description: '', status: 'active', course_image: null });
@@ -376,6 +388,21 @@ async function loadDashboard() {
       : [];
 
     videos.value = fetchedVideos;
+
+    // ✅ BUSCA TODOS OS USUÁRIOS (USANDO SUA ROTA allusers)
+    const usersResponse = await axios.get(
+      'http://localhost:8000/api/users/allusers',
+      authHeaders()
+    );
+
+    users.value = Array.isArray(usersResponse.data)
+      ? usersResponse.data
+      : usersResponse.data?.data || [];
+
+    usersCount.value = users.value.length;
+
+    console.log('USUÁRIOS:', users.value);
+
 
     // ✅ Soma total de alunos corretamente
     studentsCount.value = courses.value.reduce(

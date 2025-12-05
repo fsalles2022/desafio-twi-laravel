@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('users')->middleware('role:teacher|admin')->group(function () {
+        Route::get('/allusers', [UserController::class, 'allUsers']);
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::get('/{id}', [UserController::class, 'show']);
