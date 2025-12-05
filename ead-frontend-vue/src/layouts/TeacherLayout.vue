@@ -1,148 +1,216 @@
 <script setup>
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-import Footer from '../components/Footer.vue'
-import { useAuthStore } from '../stores/auth'
+import { RouterLink, RouterView, useRoute } from "vue-router";
+import Footer from "../components/Footer.vue"
+import { useAuthStore } from "../stores/auth";
 
-const auth = useAuthStore()
-const route = useRoute()
+const auth = useAuthStore();
+const route = useRoute();
 </script>
-
 <template>
-  <div class="d-flex flex-column min-vh-100 bg-light text-dark">
+  <div class="layout-wrapper">
 
     <!-- LOADING -->
     <div v-if="auth.user === null" class="loading-screen">
-      <div class="spinner-border text-success" role="status"></div>
+      <div class="cyber-loader"></div>
     </div>
 
-    <!-- LAYOUT PRINCIPAL -->
+    <!-- LAYOUT -->
     <template v-else>
 
-      <!-- HEADER -->
-      <header class="navbar navbar-expand-lg shadow-sm teacher-header">
-        <div class="container">
+      <!-- ==== HEADER FUTURISTA ==== -->
+      <header class="admin-header glass-nav shadow-neon">
+        <div class="container d-flex justify-content-between align-items-center">
 
           <!-- LOGO -->
-          <RouterLink to="/courses" class="navbar-brand fw-bold d-flex align-items-center text-white">
-            <i class="bi bi-easel2-fill me-2 fs-4"></i>
-            <span>DEVNEST • Professor</span>
+          <RouterLink to="/home" class="logo">
+            <i class="bi bi-mortarboard-fill me-2"></i> DEVNEST • PROFESSOR
           </RouterLink>
 
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navTeacher">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-
           <!-- MENU -->
-          <div class="collapse navbar-collapse justify-content-end" id="navTeacher">
-            <ul class="navbar-nav align-items-center gap-3">
+          <nav class="menu">
 
-               <li class="nav-item">
-                <RouterLink to="/welcome" class="nav-link teacher-nav"
-                  :class="{ active: route.path.includes('/welcome') }">
-                  <i class="bi bi-emoji-smile welcome-icon"></i>Boas vindas!
-                </RouterLink>
-              </li>
+            <RouterLink class="menu-item" to="/welcome" :class="{ active: route.path === '/welcome' }">
+              <i class="bi bi-plug"></i>welcome
+            </RouterLink>
 
-              <!-- DASHBOARD -->
-              <li class="nav-item">
-                <RouterLink to="/teacher/dashboard" class="nav-link teacher-nav"
-                  :class="{ active: route.path === '/teacher/dashboard' }">
-                  <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                </RouterLink>
-              </li>
 
-              <!-- CURSOS -->
-              <li class="nav-item">
-                <RouterLink to="/teacher/courses" class="nav-link teacher-nav"
-                  :class="{ active: route.path.includes('/teacher/courses') }">
-                  <i class="bi bi-journal-code me-1"></i> Meus Cursos
-                </RouterLink>
-              </li>
+            <RouterLink class="menu-item" to="/teacher/dashboard"
+              :class="{ active: route.path === '/teacher/dashboard' }">
+              <i class="bi bi-speedometer2"></i> Dashboard
+            </RouterLink>
 
-              <!-- VÍDEOS -->
-              <li class="nav-item">
-                <RouterLink to="/videos" class="nav-link teacher-nav"
-                  :class="{ active: route.path.includes('/videos') }">
-                  <i class="bi bi-camera-reels me-1"></i> Meus Vídeos
-                </RouterLink>
-              </li>
 
-              <!-- USER DROPDOWN -->
-              <li class="nav-item dropdown" v-if="auth.user">
-                <a class="nav-link dropdown-toggle text-white fw-semibold" data-bs-toggle="dropdown" href="#">
-                  <img
-                    :src="auth.user.image ? `http://localhost:8000/storage/${auth.user.image}` : 'https://via.placeholder.com/35?text=U'"
-                    class="rounded-circle me-2" width="35" height="35" />
-                  {{ auth.user.name }}
-                </a>
+            <RouterLink class="menu-item" to="/teacher/courses"
+              :class="{ active: route.path.includes('/teacher/courses') }">
+              <i class="bi bi-journal-code"></i> Cursos da Plataforma
+            </RouterLink>
 
-                <ul class="dropdown-menu dropdown-menu-end shadow">
-                  <li>
-                    <RouterLink to="/profile" class="dropdown-item">Meu Perfil</RouterLink>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
-                  <li><button @click="auth.logout" class="dropdown-item text-danger">Sair</button></li>
-                </ul>
-              </li>
+            <RouterLink class="menu-item" to="/teacher/my-courses"
+              :class="{ active: route.path.includes('/teacher/my-courses') }">
+              <i class="bi bi-bookmark-star"></i> Meus Cursos
+            </RouterLink>
 
-            </ul>
-          </div>
+            <!-- USER -->
+            <div class="user-area dropdown" v-if="auth.user">
+              <a class="user-btn" data-bs-toggle="dropdown">
+                <img :src="auth.user.image
+                  ? 'http://localhost:8000/storage/' + auth.user.image
+                  : 'https://via.placeholder.com/40?text=U'" class="avatar" />
+                {{ auth.user.name }}
+              </a>
 
+              <ul class="dropdown-menu dropdown-menu-end glass-dropdown shadow-neon">
+                <li>
+                  <RouterLink to="/student/profile" class="dropdown-item">
+                    Meu Perfil
+                  </RouterLink>
+                </li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li>
+                  <button @click="auth.logout" class="dropdown-item text-danger">
+                    Sair
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+          </nav>
         </div>
       </header>
 
       <!-- CONTEÚDO -->
-      <main class="flex-grow-1 py-5">
+      <main class="content-area">
         <div class="container">
           <RouterView />
         </div>
       </main>
 
       <Footer />
-
     </template>
   </div>
 </template>
 
 <style scoped>
-/* HEADER */
-.teacher-header {
-  background: linear-gradient(90deg, #0b0c0c, #157347);
-  padding: 15px 0;
+/* ===========================
+    TEMA FUTURISTA
+=========================== */
+.layout-wrapper {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #0d0d1a, #000);
+  color: #d9eaff;
+  overflow-x: hidden;
 }
 
-/* NAV LINKS */
-.teacher-nav {
-  color: #e8f5e9 !important;
+/* ===========================
+    HEADER (GLASS + NEON)
+=========================== */
+.admin-header {
+  padding: 18px 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(15px);
+}
+
+.glass-nav {
+  background: rgba(20, 20, 40, 0.55);
+  border-bottom: 1px solid rgba(90, 120, 255, 0.2);
+}
+
+.shadow-neon {
+  box-shadow: 0 0 20px #3b82f6aa, 0 0 40px #9333ea55 inset;
+}
+
+/* LOGO */
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #71c9ff;
+  text-decoration: none;
+  text-shadow: 0 0 10px #00c8ff, 0 0 20px #0099ff;
+  transition: 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* ===========================
+    MENU
+=========================== */
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.menu-item {
+  color: #b9ceff;
   font-weight: 600;
+  padding-bottom: 4px;
   position: relative;
-  padding-bottom: 6px;
-  transition: 0.25s ease;
+  text-decoration: none;
+  transition: 0.22s ease-out;
 }
 
-.teacher-nav:hover {
-  color: #ffffff !important;
-  transform: translateY(-1px);
+.menu-item:hover {
+  color: #fff;
+  text-shadow: 0 0 8px #3b82f6;
+  transform: translateY(-2px);
 }
 
-.teacher-nav.active {
-  color: #fff !important;
+.menu-item.active {
+  color: #ffffff;
+  text-shadow: 0 0 12px #60a5fa;
 }
 
-.teacher-nav.active::after {
+.menu-item.active::after {
   content: "";
   position: absolute;
-  bottom: 0;
+  bottom: -3px;
   left: 0;
   width: 100%;
   height: 3px;
-  background: #ffffff;
-  border-radius: 10px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #3b82f6, #9333ea);
 }
 
-/* LOADING */
+/* ===========================
+    USER AREA
+=========================== */
+.user-area {
+  position: relative;
+}
+
+.user-btn {
+  color: #e2eafd;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #3b82f6;
+}
+
+.glass-dropdown {
+  background: rgba(20, 20, 40, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 100, 255, 0.25);
+}
+
+/* ===========================
+    LOADING FUTURISTA
+=========================== */
 .loading-screen {
   height: 100vh;
   display: flex;
@@ -150,9 +218,26 @@ const route = useRoute()
   align-items: center;
 }
 
-/* DROPDOWN */
-.dropdown-menu {
-  border-radius: 10px;
-  overflow: hidden;
+.cyber-loader {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #0ff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  box-shadow: 0 0 15px #0ff, 0 0 30px #00f5ff inset;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===========================
+    CONTEÚDO
+=========================== */
+.content-area {
+  padding: 60px 0;
 }
 </style>

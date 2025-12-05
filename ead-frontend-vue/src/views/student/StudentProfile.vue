@@ -1,6 +1,6 @@
 <template>
   <div class="profile card shadow-sm p-4 mx-auto" style="max-width: 500px;">
-    <h2 class="mb-4 text-center">Perfil De Administrador</h2>
+    <h2 class="mb-4 text-center">Meu Perfil</h2>
 
     <form @submit.prevent="updateProfile" class="d-flex flex-column gap-3">
 
@@ -74,7 +74,7 @@ const updateProfile = async () => {
     alert("Perfil atualizado com sucesso!");
 
     // 🔥 Mantém na mesma página
-    router.push("/teacher/dashboard");
+    router.push("/student/dashboard");
 
   } catch (err) {
     alert("Erro ao atualizar perfil");

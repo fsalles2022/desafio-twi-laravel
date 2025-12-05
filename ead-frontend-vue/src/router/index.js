@@ -29,12 +29,12 @@ const router = createRouter({
     // =========================
     // PERFIL
     // =========================
-    {
-      path: '/profile',
-      name: 'profile',
-      component: () => import('../views/Profile.vue'),
-      meta: { requiresAuth: true },
-    },
+    // {
+    //   path: '/profile',
+    //   name: 'profile',
+    //   component: () => import('../views/Profile.vue'),
+    //   meta: { requiresAuth: true },
+    // },
 
     // =========================
     // ADMIN
@@ -49,7 +49,7 @@ const router = createRouter({
     {
       path: '/admin/profile',
       name: 'admin-profile',
-      component: () => import('../views/admin/Profile.vue'),
+      component: () => import('../views/admin/AdminProfile.vue'),
       meta: { requiresAuth: true },
     },
 
@@ -77,6 +77,20 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
+     {
+      path: '/teacher/my-courses',
+      name: 'teacher-mycourses',
+      component: () => import('../views/teacher/MyCourses.vue'),
+      meta: { requiresAuth: true },
+    },
+
+     {
+      path: '/teacher/profile',
+      name: 'teacher-profile',
+      component: () => import('../views/teacher/TeacherProfile.vue'),
+      meta: { requiresAuth: true },
+    },
+
     // =========================
     // ALUNO (STUDENT)
     // =========================
@@ -100,6 +114,14 @@ const router = createRouter({
       component: () => import('../views/student/MyCourses.vue'),
       meta: { requiresAuth: true },
     },
+
+     {
+      path: '/student/profile',
+      name: 'student-profile',
+      component: () => import('../views/student/StudentProfile.vue'),
+      meta: { requiresAuth: true },
+    },
+    
 
     // =========================
     // VÍDEOS / CURSO

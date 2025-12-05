@@ -42,7 +42,7 @@ const courses = ref([]);
 
 const fetchCourses = async () => {
   try {
-    const res = await axios.get("http://localhost:8000/api/courses", {
+    const res = await axios.get("http://localhost:8000/api/public/courses", {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
 

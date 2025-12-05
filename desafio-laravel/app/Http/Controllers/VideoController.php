@@ -11,36 +11,40 @@ use Illuminate\Support\Facades\DB;
 
 class VideoController extends Controller
 {
-
+    /**
+     * Lista todos os vídeos (teacher/admin)
+     */
     public function index()
     {
         $videos = Video::with('course')->get()->map(function ($v) {
-            $v->url = url("/api/video/{$v->filename}");
+            $v->url = url("/api/video/stream/{$v->filename}");
             return $v;
         });
 
         return response()->json($videos);
     }
 
-    // Listar vídeos do usuário logado
-
+    /**
+     * Vídeos do usuário logado (teacher)
+     */
     public function userVideos()
     {
         $user = Auth::user();
 
-        $videos = Video::where('user_id', $user->id)
+        $videos = Video::whereHas('users', fn($q) => $q->where('users.id', $user->id))
             ->with('course')
             ->get()
             ->map(function ($v) {
-                $v->url = url("/api/video/{$v->filename}");
+                $v->url = url("/api/video/stream/{$v->filename}");
                 return $v;
             });
 
         return response()->json($videos);
     }
 
-
-    // Cadastrar vídeo
+    /**
+     * Cadastrar vídeo (teacher/admin)
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -60,18 +64,16 @@ class VideoController extends Controller
         DB::beginTransaction();
 
         try {
-
-            // 1️⃣ Salvar metadados (já com course_id)
             $video = Video::create([
                 'title'     => $request->title,
                 'filename'  => $filename,
                 'course_id' => $request->course_id,
             ]);
 
-            // 2️⃣ Relacionar com usuário logado
+            // Relaciona com usuário (teacher)
             $request->user()->videos()->attach($video->id);
 
-            // 3️⃣ Enviar arquivo para Node Video Service
+            // Envia para o Node
             $nodeUrl = 'http://localhost:4000/upload';
 
             $response = Http::attach(
@@ -81,46 +83,47 @@ class VideoController extends Controller
             )->post($nodeUrl);
 
             if ($response->failed()) {
-                // Rollback geral
                 $request->user()->videos()->detach($video->id);
                 $video->delete();
                 DB::rollBack();
 
-                return response()->json(['error' => 'Falha ao enviar arquivo para Node'], 500);
+                return response()->json(['error' => 'Erro ao enviar para o Node'], 500);
             }
 
             DB::commit();
 
-            // Adicionar URL retornável
-            $video->url = url("/api/video/{$filename}");
+            $video->url = url("/api/video/stream/{$filename}");
 
             return response()->json($video, 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Erro: ' . $e->getMessage()], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
+    /**
+     * Atualizar vídeo (teacher/admin)
+     */
     public function update(Request $request, $id)
     {
         $video = Video::findOrFail($id);
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
+        $data = $request->validate([
+            'title'     => 'required|string|max:255',
             'course_id' => 'required|exists:courses,id',
         ]);
 
-        // Atualiza os metadados
-        $video->update($validated);
+        $video->update($data);
 
         return response()->json([
-            'message' => 'Vídeo atualizado com sucesso!',
+            'message' => 'Vídeo atualizado com sucesso',
             'video' => $video
         ]);
     }
 
-
-
+    /**
+     * Deletar vídeo (teacher/admin)
+     */
     public function destroy($id)
     {
         $video = Video::findOrFail($id);
@@ -129,60 +132,52 @@ class VideoController extends Controller
         return response()->json(['message' => 'Vídeo deletado']);
     }
 
-    // Streaming proxy
+    /**
+     * Streaming via Node
+     */
     public function stream($filename)
     {
         $nodeUrl = "http://localhost:4000/stream/{$filename}";
 
-        try {
-            $response = Http::withHeaders([
-                'Range' => request()->header('Range', '')
-            ])->get($nodeUrl);
+        $response = Http::withHeaders([
+            'Range' => request()->header('Range', '')
+        ])->get($nodeUrl);
 
-            $headers = [];
+        $headers = [];
 
-            foreach ($response->headers() as $key => $value) {
-                $headers[$key] = is_array($value) ? $value[0] : $value;
-            }
-
-            return response($response->body(), $response->status())
-                ->withHeaders($headers);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Falha no proxy: ' . $e->getMessage()], 500);
+        foreach ($response->headers() as $key => $value) {
+            $headers[$key] = is_array($value) ? $value[0] : $value;
         }
+
+        return response($response->body(), $response->status())
+            ->withHeaders($headers);
     }
 
+    /**
+     * Marcar vídeo como assistido (student)
+     */
     public function markAsWatched($videoId)
     {
-        $user = Auth::user();
-        $user = User::with('roles')->find($user->id);
-
-        // Verifica se o vídeo existe
+        $user = User::with('roles')->findOrFail(Auth::id());
         $video = Video::findOrFail($videoId);
 
-        // Verifica se o aluno está inscrito no curso do vídeo
-        $isEnrolled = $user->courses()->where('course_id', $video->course_id)->exists();
-
-        if (! $isEnrolled) {
-            return response()->json([
-                'error' => 'Not enrolled'
-            ], 403);
+        // Admin e teacher não precisam marcar
+        if ($user->hasAnyRole(['teacher', 'admin'])) {
+            return response()->json(['message' => 'Not applicable']);
         }
 
-        // Verifica se já marcou como assistido (pivot)
-        $alreadyWatched = $user->watchedVideos()
-            ->where('video_id', $videoId)
+        // Verifica matrícula
+        $isEnrolled = $user->enrolledCourses()
+            ->where('course_id', $video->course_id)
             ->exists();
 
-        if ($alreadyWatched) {
-            return response()->json([
-                'message' => 'Already watched',
-                'video_id' => $videoId
-            ]);
+        if (!$isEnrolled) {
+            return response()->json(['error' => 'Not enrolled'], 403);
         }
 
-        // Marca como assistido
-        $user->watchedVideos()->attach($videoId);
+        if (!$user->watchedVideos()->where('video_id', $videoId)->exists()) {
+            $user->watchedVideos()->attach($videoId);
+        }
 
         return response()->json([
             'message' => 'Video marked as watched',
@@ -190,36 +185,26 @@ class VideoController extends Controller
         ]);
     }
 
+    /**
+     * Desmarcar vídeo como assistido (student)
+     */
     public function unmarkAsWatched($videoId)
     {
-        $user = Auth::user();
-        $user = User::with('roles')->find($user->id);
-
-        // Verifica se o vídeo existe
+        $user = User::with('roles')->findOrFail(Auth::id());
         $video = Video::findOrFail($videoId);
 
-        // Verifica se o aluno está inscrito no curso
-        $isEnrolled = $user->courses()->where('course_id', $video->course_id)->exists();
-
-        if (! $isEnrolled) {
-            return response()->json([
-                'error' => 'Not enrolled'
-            ], 403);
+        if ($user->hasAnyRole(['teacher', 'admin'])) {
+            return response()->json(['message' => 'Not applicable']);
         }
 
-        // Verifica se existe o registro no pivot
-        $alreadyWatched = $user->watchedVideos()
-            ->where('video_id', $videoId)
+        $isEnrolled = $user->enrolledCourses()
+            ->where('course_id', $video->course_id)
             ->exists();
 
-        if (! $alreadyWatched) {
-            return response()->json([
-                'message' => 'Not marked as watched',
-                'video_id' => $videoId
-            ]);
+        if (!$isEnrolled) {
+            return response()->json(['error' => 'Not enrolled'], 403);
         }
 
-        // Remove do pivot
         $user->watchedVideos()->detach($videoId);
 
         return response()->json([

@@ -30,7 +30,7 @@
         <div class="col-md-4">
           <div class="dash-card shadow-sm border-0 p-4 rounded-4 bg-gradient-1 text-white">
             <div class="d-flex justify-content-between align-items-center">
-              <h5 class="fw-semibold">Cursos Criados</h5>
+              <h5 class="fw-semibold">Quantidade de Cursos</h5>
               <i class="bi bi-journal-bookmark fs-2 opacity-75"></i>
             </div>
             <h1 class="fw-bold mt-3">{{ courses.length }}</h1>
@@ -70,7 +70,7 @@
         <div class="col-md-6 mb-4">
           <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold m-0">📚 Últimos Cursos</h5>
+              <h5 class="fw-bold m-0">📚 Cursos Criados</h5>
               <div class="d-flex gap-2">
                 <button class="btn btn-outline-success btn-sm" @click="openNewCourseModal">Novo Curso</button>
               </div>

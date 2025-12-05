@@ -1,6 +1,6 @@
 <template>
   <div class="container py-4">
-    <h1 class="mb-4 text-center">📚 Todos os Cursos da Plataforma - Professor</h1>
+    <h1 class="mb-4 text-center">📚 Meus Cursos</h1>
 
     <div v-if="loading" class="text-center my-5">
       <div class="spinner-border text-primary"></div>
@@ -17,7 +17,7 @@
             <p class="text-muted">{{ c.description }}</p>
              <p class="text-muted">Id Curso: {{ c.id }}</p>
 
-            <router-link :to="`/courses/${c.id}`" class="btn btn-primary w-100">
+            <router-link :to="`/course/${c.id}`" class="btn btn-primary w-100">
               Acessar Aulas →
             </router-link>
           </div>

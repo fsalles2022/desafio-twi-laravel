@@ -43,7 +43,7 @@ const route = useRoute();
 
             <RouterLink class="menu-item" to="/admin/courses"
               :class="{ active: route.path.includes('/admin/courses') }">
-              <i class="bi bi-journal-code"></i> Cursos
+              <i class="bi bi-journal-code"></i> Cursos da Plataforma
             </RouterLink>
 
             <RouterLink class="menu-item" to="/admin/videos" :class="{ active: route.path.includes('/admin/videos') }">

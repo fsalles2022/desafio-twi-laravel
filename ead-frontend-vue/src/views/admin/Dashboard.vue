@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h2 class="fw-bold">Painel do Professor</h2>
-        <p class="text-muted m-0">Bem-vindo, <strong>{{ auth.user.name }}</strong></p>
+        <p class="text-white m-0">Bem-vindo, <strong>{{ auth.user.name }}</strong></p>
       </div>
 
       <div class="d-flex gap-2">
@@ -272,25 +272,46 @@ function authHeaders() {
 /** LOAD DATA */
 async function loadDashboard() {
   loading.value = true;
+
   try {
-    // courses
-    const coursesResponse = await axios.get('http://localhost:8000/api/courses', authHeaders());
+    // ✅ Cursos (funciona para ADMIN e TEACHER)
+    const coursesResponse = await axios.get(
+      'http://localhost:8000/api/courses',
+      authHeaders()
+    );
 
-    let fetched = coursesResponse.data.my_courses || coursesResponse.data || [];
-    // ensure array
-    if (!Array.isArray(fetched)) fetched = [];
+    // compatível com:
+    // { my_courses: [...] }  OU  [ ... ]
+    let fetchedCourses =
+      coursesResponse.data?.my_courses ||
+      coursesResponse.data ||
+      [];
 
-    // only teacher's courses
-    courses.value = fetched.filter(c => c.user_id === auth.user.id);
+    if (!Array.isArray(fetchedCourses)) fetchedCourses = [];
 
-    // videos (all) then filter by course ids
-    const videosResponse = await axios.get('http://localhost:8000/api/videos', authHeaders());
-    const vids = Array.isArray(videosResponse.data) ? videosResponse.data : [];
-    const courseIds = courses.value.map(c => c.id);
-    videos.value = vids.filter(v => courseIds.includes(v.course_id));
+    courses.value = fetchedCourses;
 
-    // students count
-    studentsCount.value = courses.value.reduce((acc, course) => acc + (course.students?.length || 0), 0);
+    // ✅ Todos os vídeos
+    const videosResponse = await axios.get(
+      'http://localhost:8000/api/videos',
+      authHeaders()
+    );
+
+    const fetchedVideos = Array.isArray(videosResponse.data)
+      ? videosResponse.data
+      : [];
+
+    videos.value = fetchedVideos;
+
+    // ✅ Soma total de alunos corretamente
+    studentsCount.value = courses.value.reduce(
+      (acc, course) => acc + (course.students?.length || 0),
+      0
+    );
+
+    console.log('Cursos:', courses.value.length);
+    console.log('Vídeos:', videos.value.length);
+    console.log('Alunos:', studentsCount.value);
 
   } catch (err) {
     console.error('Erro ao carregar dashboard:', err);
@@ -298,6 +319,8 @@ async function loadDashboard() {
     loading.value = false;
   }
 }
+
+
 
 /** COURSE CRUD */
 function openNewCourseModal() {
