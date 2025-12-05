@@ -24,29 +24,45 @@ class CourseController extends Controller
     /**
      * Lista cursos do usuário autenticado
      */
-    public function index()
-    {
-        $user = User::with('roles')->find(Auth::id());
+   public function index()
+{
+    $user = User::with('roles')->find(Auth::id());
 
-        // ✅ Teacher e Admin veem tudo
-        if ($user->hasAnyRole(['teacher', 'admin'])) {
-            return response()->json([
-                'my_courses'  => Course::with(['teacher', 'students'])->orderBy('id', 'desc')->get(),
-                'all_courses' => Course::with(['teacher', 'students'])->orderBy('id', 'desc')->get(),
-
-            ]);
-        }
-
-        // ✅ Student vê apenas os seus e os ativos
-        if ($user->hasRole('student')) {
-            return response()->json([
-                'my_courses'  => $user->studentCourses()->with('teacher')->get(),
-                'all_courses' => Course::active()->with('teacher')->get(),
-            ]);
-        }
-
-        return response()->json([], 403);
+    // ✅ ADMIN → vê tudo
+    if ($user->hasRole('admin')) {
+        return response()->json([
+            'my_courses'   => Course::with(['teacher', 'students'])->orderBy('id', 'desc')->get(),
+            'all_courses'  => Course::with(['teacher', 'students'])->orderBy('id', 'desc')->get(),
+            'created_count' => Course::count(), // total geral
+        ]);
     }
+
+    // ✅ TEACHER → vê APENAS os cursos que ELE CRIOU + total
+    if ($user->hasRole('teacher')) {
+
+        $myCourses = Course::where('user_id', $user->id)
+            ->with(['teacher', 'students'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return response()->json([
+            'my_courses'    => $myCourses,
+            'all_courses'   => Course::active()->with(['teacher'])->get(),
+            'created_count' => $myCourses->count(), // ✅ TOTAL DE CURSOS CRIADOS
+        ]);
+    }
+
+    // ✅ STUDENT → vê apenas os seus cursos
+    if ($user->hasRole('student')) {
+        return response()->json([
+            'my_courses'  => $user->studentCourses()->with(['teacher', 'students'])->get(),
+            'all_courses' => Course::active()->with(['teacher', 'students'])->get(),
+        ]);
+    }
+
+    return response()->json([], 403);
+}
+
 
 
     /**
