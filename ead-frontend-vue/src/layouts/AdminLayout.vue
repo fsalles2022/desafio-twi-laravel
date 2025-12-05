@@ -37,8 +37,8 @@ const route = useRoute();
               <i class="bi bi-speedometer2"></i> Dashboard
             </RouterLink>
 
-            <RouterLink class="menu-item" to="/admin/users" :class="{ active: route.path.includes('/admin/users') }">
-              <i class="bi bi-people"></i> Usuários
+            <RouterLink class="menu-item" to="/admin/teachers/create" :class="{ active: route.path.includes('/admin/users') }">
+              <i class="bi bi-people"></i> Professores
             </RouterLink>
 
             <RouterLink class="menu-item" to="/admin/courses"

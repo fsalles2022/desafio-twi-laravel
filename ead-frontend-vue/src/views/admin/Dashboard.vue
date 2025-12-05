@@ -15,6 +15,11 @@
         <button class="btn btn-primary px-4 py-2 fw-semibold rounded-3" @click="openNewVideoModal">
           + Enviar Vídeo
         </button>
+        <button class="btn btn-warning px-4 py-2 fw-semibold rounded-3" @click="openTeacherModal">
+          + Cadastrar Professor
+        </button>
+
+
       </div>
     </div>
 
@@ -234,6 +239,51 @@
       </div>
     </div>
 
+    <!-- ===== TEACHER MODAL ===== -->
+    <div v-if="showTeacherModal" class="modal-backdrop" @click="closeTeacherModal">
+      <div class="modal-container" @click.stop>
+
+        <div class="modal-header">
+          <h3>Cadastrar Professor</h3>
+          <button class="btn-close" @click="closeTeacherModal">×</button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="form-group mb-2">
+            <label class="form-label">Nome</label>
+            <input v-model="teacherForm.name" class="form-control" placeholder="Nome do professor" />
+          </div>
+
+          <div class="form-group mb-2">
+            <label class="form-label">E-mail</label>
+            <input v-model="teacherForm.email" class="form-control" placeholder="email@email.com" />
+          </div>
+
+          <div class="form-group mb-2">
+            <label class="form-label">Senha</label>
+            <input type="password" v-model="teacherForm.password" class="form-control" />
+          </div>
+
+          <div class="form-group mb-2">
+            <label class="form-label">Confirmar Senha</label>
+            <input type="password" v-model="teacherForm.password_confirmation" class="form-control" />
+          </div>
+
+          <div v-if="teacherError" class="alert alert-danger small">{{ teacherError }}</div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="closeTeacherModal">Cancelar</button>
+          <button class="btn btn-warning" :disabled="teacherLoading" @click="saveTeacher">
+            <span v-if="teacherLoading" class="spinner-border spinner-border-sm me-2"></span>
+            Criar Professor
+          </button>
+        </div>
+
+      </div>
+    </div>
+
 
   </div>
 </template>
@@ -250,6 +300,18 @@ const courses = ref([]);
 const videos = ref([]);
 const studentsCount = ref(0);
 const chartCanvas = ref(null);
+const showTeacherModal = ref(false)
+
+const teacherForm = ref({
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: ''
+})
+
+const teacherLoading = ref(false)
+const teacherError = ref('')
+
 
 // modal states
 const showCourseModal = ref(false);
@@ -268,6 +330,11 @@ const videoError = ref('');
 function authHeaders() {
   return { headers: { Authorization: `Bearer ${auth.token}` } };
 }
+
+function onTeacherCreated() {
+  alert("Professor criado com sucesso!")
+}
+
 
 /** LOAD DATA */
 async function loadDashboard() {
@@ -470,6 +537,46 @@ async function confirmDeleteVideo(video) {
 function courseTitle(id) {
   const c = courses.value.find(x => x.id === id);
   return c ? c.title : null;
+}
+
+function openTeacherModal() {
+  teacherForm.value = {
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: ''
+  }
+  teacherError.value = ''
+  showTeacherModal.value = true
+}
+
+function closeTeacherModal() {
+  showTeacherModal.value = false
+}
+
+async function saveTeacher() {
+  teacherError.value = ''
+  teacherLoading.value = true
+
+  try {
+    await axios.post(
+      'http://localhost:8000/api/admin/create-teacher',
+      teacherForm.value,
+      authHeaders()
+    )
+
+    alert('Professor criado com sucesso!')
+    closeTeacherModal()
+
+  } catch (err) {
+    console.error('Erro ao criar professor:', err)
+    teacherError.value =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      'Erro ao criar professor'
+  } finally {
+    teacherLoading.value = false
+  }
 }
 
 onMounted(() => {

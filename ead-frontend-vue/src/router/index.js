@@ -60,6 +60,13 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
+      {
+      path: '/admin/teachers/create',
+      name: 'admin-teachers-create',
+      component: () => import('../views/admin/CreateTeacherModal.vue'),
+      meta: { requiresAuth: true },
+    },
+
     // =========================
     // PROFESSOR
     // =========================
