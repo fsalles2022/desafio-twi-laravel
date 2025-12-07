@@ -61,6 +61,17 @@
           </div>
         </div>
 
+        <!-- NOVO CARD: ADMINS -->
+        <div class="col-md-4">
+          <div class="dash-card shadow-sm border-0 p-4 rounded-4 bg-gradient-admin text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="fw-semibold">Administradores</h5>
+              <i class="bi bi-shield-lock-fill fs-2 opacity-75"></i>
+            </div>
+            <h1 class="fw-bold mt-3">{{ adminsCount }}</h1>
+          </div>
+        </div>
+
         <div class="col-md-4">
           <div class="dash-card shadow-sm border-0 p-4 rounded-4 bg-gradient-2 text-white">
             <div class="d-flex justify-content-between align-items-center">
@@ -208,6 +219,52 @@
         </div>
       </div>
       <!-- === FIM LISTA DE PROFESSORES === -->
+
+      <!-- === NOVA SEÇÃO: LISTA DE ADMINS (com editar e deletar) === -->
+      <div class="row mt-3">
+        <div class="col-12">
+          <div class="card shadow-sm border-0 rounded-4 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold m-0">🛡️ Lista de Administradores</h5>
+              <div></div>
+            </div>
+
+            <div v-if="admins.length === 0" class="text-muted mb-3">Nenhum administrador encontrado.</div>
+
+            <div v-else class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Foto</th>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Registro</th>
+                    <th class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="admin in admins" :key="admin.id">
+                    <td style="width: 60px;">
+                      <img :src="admin.image_url || defaultAvatar" alt="avatar" class="rounded-circle" width="48" height="48" />
+                    </td>
+                    <td>{{ admin.name }}</td>
+                    <td>{{ admin.email }}</td>
+                    <td class="text-muted small">{{ formatDate(admin.created_at) }}</td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-sm btn-outline-primary" @click="openEditAdmin(admin)">Editar</button>
+                        <button class="btn btn-sm btn-outline-danger" @click="deleteAdmin(admin.id)">Excluir</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- === FIM LISTA DE ADMINS === -->
 
     </div>
 
@@ -397,6 +454,45 @@
       </div>
     </div>
 
+    <!-- ===== EDIT ADMIN MODAL (Editar admin existente) ===== -->
+    <div v-if="showEditAdminModal" class="modal-backdrop" @click="() => showEditAdminModal = false">
+      <div class="modal-container" @click.stop>
+        <div class="modal-header">
+          <h3>Editar Administrador</h3>
+          <button class="btn-close" @click="() => showEditAdminModal = false">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div v-if="selectedAdmin">
+            <div class="form-group mb-2">
+              <label class="form-label">Nome</label>
+              <input v-model="selectedAdmin.name" class="form-control" />
+            </div>
+
+            <div class="form-group mb-2">
+              <label class="form-label">E-mail</label>
+              <input v-model="selectedAdmin.email" class="form-control" />
+            </div>
+
+            <div class="form-group mb-2">
+              <label class="form-label">Senha (opcional)</label>
+              <input type="password" v-model="selectedAdmin.password" class="form-control" placeholder="Deixe em branco para não alterar" />
+            </div>
+
+            <div v-if="editAdminError" class="alert alert-danger small">{{ editAdminError }}</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showEditAdminModal = false">Cancelar</button>
+          <button class="btn btn-success" :disabled="editAdminLoading" @click="updateAdmin">
+            <span v-if="editAdminLoading" class="spinner-border spinner-border-sm me-2"></span>
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -415,6 +511,9 @@ const users = ref([]);        // ✅ TODOS OS USUÁRIOS
 const usersCount = ref(0);   // ✅ TOTAL DE USUÁRIOS
 const teachers = ref([]); // ✅ lista de professores
 const teachersCount = ref(0); // ✅ total de professores
+const admins = ref([]); // ✅ lista de admins
+const adminsCount = ref(0); // ✅ total de admins
+
 const chartCanvas = ref(null);
 const showTeacherModal = ref(false)
 
@@ -433,6 +532,12 @@ const selectedTeacher = ref(null)
 const showEditTeacherModal = ref(false)
 const editTeacherLoading = ref(false)
 const editTeacherError = ref('')
+
+// editar admin
+const selectedAdmin = ref(null)
+const showEditAdminModal = ref(false)
+const editAdminLoading = ref(false)
+const editAdminError = ref('')
 
 const defaultAvatar = 'http://localhost:8000/default-avatar.png' // ajuste se precisar
 
@@ -536,6 +641,25 @@ async function loadDashboard() {
       teachersCount.value = 0;
     }
 
+    // ✅ BUSCA SOMENTE ADMINS
+    try {
+      const adminsResponse = await axios.get(
+        'http://localhost:8000/api/users/admins',
+        authHeaders()
+      );
+
+      admins.value = Array.isArray(adminsResponse.data)
+        ? adminsResponse.data
+        : adminsResponse.data?.data || [];
+
+      adminsCount.value = admins.value.length;
+      console.log('ADMINS:', admins.value);
+    } catch (errAdmins) {
+      console.error('Erro ao carregar admins:', errAdmins);
+      admins.value = [];
+      adminsCount.value = 0;
+    }
+
     // ✅ Soma total de alunos corretamente
     studentsCount.value = courses.value.reduce(
       (acc, course) => acc + (course.students?.length || 0),
@@ -609,6 +733,63 @@ async function deleteTeacher(id) {
   } catch (err) {
     console.error('Erro ao deletar professor:', err);
     alert('Falha ao deletar professor');
+  }
+}
+
+/** FUNÇÕES DE ADMINS (LISTAR, EDITAR, DELETAR) */
+async function loadAdmins() {
+  try {
+    const res = await axios.get('http://localhost:8000/api/users/admins', authHeaders());
+    admins.value = Array.isArray(res.data) ? res.data : res.data?.data || [];
+    adminsCount.value = admins.value.length;
+  } catch (err) {
+    console.error('Erro ao carregar admins:', err);
+    admins.value = [];
+    adminsCount.value = 0;
+  }
+}
+
+function openEditAdmin(admin) {
+  selectedAdmin.value = { ...admin, password: '' }; // clone e limpa senha
+  editAdminError.value = '';
+  showEditAdminModal.value = true;
+}
+
+async function updateAdmin() {
+  if (!selectedAdmin.value?.id) return;
+  editAdminLoading.value = true;
+  editAdminError.value = '';
+
+  try {
+    const payload = { ...selectedAdmin.value };
+    if (!payload.password) delete payload.password;
+
+    await axios.post(`http://localhost:8000/api/users/${payload.id}`, payload, authHeaders());
+
+    showEditAdminModal.value = false;
+    selectedAdmin.value = null;
+
+    // recarregar listas
+    await loadAdmins();
+    await loadDashboard();
+  } catch (err) {
+    console.error('Erro ao atualizar admin:', err);
+    editAdminError.value = err?.response?.data?.message || 'Falha ao atualizar admin';
+  } finally {
+    editAdminLoading.value = false;
+  }
+}
+
+async function deleteAdmin(id) {
+  if (!confirm('Tem certeza que deseja excluir este administrador?')) return;
+  try {
+    await axios.delete(`http://localhost:8000/api/users/${id}`, authHeaders());
+    // recarrega
+    await loadAdmins();
+    await loadDashboard();
+  } catch (err) {
+    console.error('Erro ao deletar admin:', err);
+    alert('Falha ao deletar admin');
   }
 }
 
@@ -807,6 +988,7 @@ async function saveTeacher() {
 onMounted(async () => {
   await loadDashboard();
   await loadTeachers();
+  await loadAdmins();
 });
 </script>
 
@@ -831,6 +1013,11 @@ onMounted(async () => {
 /* novo gradiente para professores */
 .bg-gradient-4 {
   background: linear-gradient(135deg, #8e44ad, #6f42c1);
+}
+
+/* gradiente admin */
+.bg-gradient-admin {
+  background: linear-gradient(135deg, #e53935, #c62828);
 }
 
 .dash-card {
@@ -892,9 +1079,6 @@ onMounted(async () => {
   font-size: 22px;
   cursor: pointer;
 }
-
-/* estilos para modal de edição de professor (usa as mesmas classes modal-container, etc.) */
-/* se quiser um modal menor específico, podemos criar classes novas */
 
 /* small UI tweaks */
 .list-group-item {

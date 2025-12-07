@@ -26,6 +26,12 @@ class UserController extends Controller
         return response()->json($teachers);
     }
 
+        public function allAdmins()
+    {
+        $admins = User::role('admin')->get();
+        return response()->json($admins);
+    }
+
     /**
      * Listar todos os usuários com vídeos
      */
