@@ -58,9 +58,6 @@
         </div>
       </div>
     </div>
-
-    <!-- FOOTER -->
-    <Footer />
   </div>
 </template>
 

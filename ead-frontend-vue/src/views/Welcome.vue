@@ -20,7 +20,7 @@ const auth = useAuthStore()
           <span class="glow">Bem-vindo,</span> {{ auth.user?.name }}
         </h1>
         <p class="subtitle">
-          O futuro da sua plataforma começa aqui.
+          O futro passa por aqui!
         </p>
       </div>
 

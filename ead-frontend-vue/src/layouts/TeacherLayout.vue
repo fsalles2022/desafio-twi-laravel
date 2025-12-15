@@ -61,7 +61,7 @@ const route = useRoute();
 
               <ul class="dropdown-menu dropdown-menu-end glass-dropdown shadow-neon">
                 <li>
-                  <RouterLink to="/student/profile" class="dropdown-item">
+                  <RouterLink to="/teacher/profile" class="dropdown-item">
                     Meu Perfil
                   </RouterLink>
                 </li>
