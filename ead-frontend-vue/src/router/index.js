@@ -12,7 +12,12 @@ const router = createRouter({
     // PÚBLICAS
     // =========================
     { path: '/', name: 'home', component: Home },
-    { path: '/login', name: 'login', component: Login },
+    
+    {
+      path: '/login',
+      component: () => import('../views/Login.vue'),
+      meta: { guest: true }
+    },
 
     {
       path: '/register',
@@ -60,7 +65,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-      {
+    {
       path: '/admin/teachers/create',
       name: 'admin-teachers-create',
       component: () => import('../views/admin/CreateTeacherModal.vue'),
@@ -84,14 +89,14 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-     {
+    {
       path: '/teacher/my-courses',
       name: 'teacher-mycourses',
       component: () => import('../views/teacher/MyCourses.vue'),
       meta: { requiresAuth: true },
     },
 
-     {
+    {
       path: '/teacher/profile',
       name: 'teacher-profile',
       component: () => import('../views/teacher/TeacherProfile.vue'),
@@ -122,13 +127,13 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-     {
+    {
       path: '/student/profile',
       name: 'student-profile',
       component: () => import('../views/student/StudentProfile.vue'),
       meta: { requiresAuth: true },
     },
-    
+
 
     // =========================
     // VÍDEOS / CURSO
@@ -161,14 +166,15 @@ const router = createRouter({
 // =========================
 // GUARD DE AUTENTICAÇÃO
 // =========================
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
-  if (to.meta.requiresAuth && !auth.token) {
-    return next('/login')
+  if (!auth.token && to.meta.requiresAuth) {
+    next('/')
+  } else {
+    next()
   }
-
-  next()
 })
+
 
 export default router

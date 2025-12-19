@@ -11,7 +11,10 @@ class CreateTeacherController extends Controller
 {
     public function createTeacher(Request $request)
     {
-        $user = Auth::user();
+        // 🔒 Garantia de segurança (caso a rota falhe)
+        if (!auth()->user()->hasRole('admin')) {
+            abort(403, 'Acesso não autorizado');
+        }
 
         $request->validate([
             'name'     => 'required|string|max:255',
@@ -20,33 +23,36 @@ class CreateTeacherController extends Controller
             'image'    => 'nullable|image|max:2048',
         ]);
 
+        // Upload da imagem
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('users', 'public');
         }
 
-        $user = User::create([
+        // Cria o professor
+        $teacher = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'image'    => $imagePath,
         ]);
 
-
-        // Atribui a role de teacher
-        $user->assignRole('teacher');
-
-        // Carrega as roles
-        $user->load('roles');
+        // Atribui role
+        $teacher->assignRole('teacher');
 
         return response()->json([
-            'user'  => $user,
-            'roles' => $user->getRoleNames(),
+            'user'  => $teacher,
+            'roles' => $teacher->getRoleNames(),
         ], 201);
     }
 
     public function index()
     {
+        // 🔒 Proteção extra
+        if (!auth()->user()->hasRole('admin')) {
+            abort(403, 'Acesso não autorizado');
+        }
+
         return User::role('teacher')->get();
     }
 }

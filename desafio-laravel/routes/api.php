@@ -146,10 +146,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/teachers', [CreateTeacherController::class, 'index']);
     });
 
-
-
-
-
     Route::middleware(['role:teacher|admin'])->group(function () {
 
         Route::get('/teacher/stats', function () {

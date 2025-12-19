@@ -48,7 +48,7 @@
 
       <div class="hero-content">
         <h1 class="title">
-          <span class="glow">Aprenda Laravel 11</span><br />
+          <span class="glow">Aprenda Laravel</span><br />
           <span class="subtitle glow-soft">Do Zero ao Avançado</span>
         </h1>
 

@@ -13,11 +13,10 @@ const auth = useAuthStore()
 const loading = ref(true)
 
 onMounted(async () => {
-  try {
+  if (auth.token && !auth.user) {
     await auth.fetchUser()
-  } finally {
-    loading.value = false
   }
+  loading.value = false
 })
 
 const layoutComponent = computed(() => {
@@ -35,9 +34,10 @@ const layoutComponent = computed(() => {
 </script>
 
 <template>
-  <component v-if="layoutComponent" :is="layoutComponent">
+  <component v-if="layoutComponent" :is="layoutComponent" :key="layoutComponent">
     <RouterView />
   </component>
+
 
   <div v-else class="text-center py-5">
     <span>Carregando...</span>

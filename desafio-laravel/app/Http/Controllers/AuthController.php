@@ -86,7 +86,7 @@ class AuthController extends Controller
                 'roles' => $user->getRoleNames(), // 👈 AQUI O OURO
             ],
             'token' => $token,
-            'refresh_token' => $refreshToken,
+            'refresh_token' => $refreshToken->token,
         ]);
     }
 
