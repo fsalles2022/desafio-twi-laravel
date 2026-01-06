@@ -4,6 +4,7 @@ namespace App\Services\Auth;
 
 use App\Models\User;
 use App\Models\RefreshToken;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
@@ -11,6 +12,11 @@ use Carbon\Carbon;
 
 class AuthService
 {
+
+    public function __construct(
+        private UserRepositoryInterface $userRepository
+    ) {}
+
     public function register(array $data)
     {
         // role padrão
@@ -43,7 +49,7 @@ class AuthService
 
     public function login(string $email, string $password)
     {
-        $user = User::where('email', $email)->first();
+        $user = $this->userRepository->findByEmail($email);
 
         if (! $user || ! Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
