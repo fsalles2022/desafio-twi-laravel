@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\RefreshTokenRepositoryInterface;
 use App\Repositories\Eloquent\UserRepository;
+use App\Repositories\Contracts\CourseRepositoryInterface;
+use App\Repositories\CourseRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             RefreshTokenRepositoryInterface::class,
             \App\Repositories\Eloquent\RefreshTokenRepository::class
+        );
+
+        $this->app->bind(
+            CourseRepositoryInterface::class,
+            CourseRepository::class
         );
     }
 }
