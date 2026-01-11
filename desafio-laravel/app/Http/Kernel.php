@@ -4,6 +4,9 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Http\Middleware\Authenticate;
+use Spatie\Permission\Middlewares\RoleMiddleware;
+
 
 class Kernel extends ConsoleKernel
 {
@@ -17,4 +20,9 @@ class Kernel extends ConsoleKernel
         $this->load(__DIR__ . '/Commands');
         require base_path('routes/console.php');
     }
+
+    protected $routeMiddleware = [
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
+    ];
 }

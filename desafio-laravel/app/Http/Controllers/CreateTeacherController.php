@@ -11,10 +11,11 @@ class CreateTeacherController extends Controller
 {
     public function createTeacher(Request $request)
     {
-        // 🔒 Garantia de segurança (caso a rota falhe)
-        if (!auth()->user()->hasRole('admin')) {
+        /** @var User $user */
+        $user = Auth::user();
+      if (!$user->hasRole('admin')) {
             abort(403, 'Acesso não autorizado');
-        }
+        }   
 
         $request->validate([
             'name'     => 'required|string|max:255',
@@ -49,7 +50,8 @@ class CreateTeacherController extends Controller
     public function index()
     {
         // 🔒 Proteção extra
-        if (!auth()->user()->hasRole('admin')) {
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
             abort(403, 'Acesso não autorizado');
         }
 
