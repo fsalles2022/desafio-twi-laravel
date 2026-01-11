@@ -14,14 +14,22 @@ class CoursePolicy
 
     public function update(User $user, Course $course): bool
     {
-        // teacher ou dono do curso
-        return $user->id === $course->user_id
-            || $user->hasAnyRole(['teacher', 'admin']);
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        return $user->hasRole('teacher') && $user->id === $course->user_id;
     }
+
 
     public function delete(User $user, Course $course): bool
     {
-        return $user->id === $course->user_id
-            || $user->hasAnyRole(['teacher', 'admin']);
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        return $user->hasRole('teacher') && $user->id === $course->user_id;
     }
+
+    
 }

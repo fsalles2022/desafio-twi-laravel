@@ -5,7 +5,9 @@ namespace App\Services\Course;
 use App\Models\Course;
 use App\Models\User;
 use App\Repositories\Contracts\CourseRepositoryInterface;
-use Illuminate\Validation\ValidationException;
+use DomainException;
+
+
 
 class CourseService
 {
@@ -13,21 +15,22 @@ class CourseService
         private CourseRepositoryInterface $courses
     ) {}
 
-    public function create(array $data, int $userId): Course
-    {
-        $user = User::findOrFail($userId);
 
+
+    public function create(array $data, User $user): Course
+    {
         if (! $user->hasRole('teacher')) {
-            throw new \DomainException('Only teachers can create courses');
+            throw new DomainException('Only teachers can create courses');
         }
 
         return $this->courses->create([
-            'title'       => $data['title'],
+            'title' => $data['title'],
             'description' => $data['description'] ?? null,
-            'status'      => $data['status'] ?? 'active',
-            'user_id'     => $userId,
+            'user_id' => $user->id,
         ]);
     }
+
+
 
 
     public function update(int $courseId, array $data): Course
@@ -38,5 +41,11 @@ class CourseService
     public function delete(int $courseId): void
     {
         $this->courses->delete($courseId);
+    }
+
+    public function getAll(): array
+    {
+        $courses = $this->courses->getAll();
+        return $courses;
     }
 }

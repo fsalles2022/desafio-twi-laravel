@@ -30,7 +30,7 @@ class CourseController extends Controller
             'status' => 'in:active,inactive'
         ]);
 
-        return $this->courses->create($data, Auth::id());
+        return $this->courses->create($data, Auth::user());
 
         $data['user_id'] = Auth::id(); // 👈 contexto do usuário autenticado
 
@@ -38,6 +38,7 @@ class CourseController extends Controller
 
         return response()->json($course, 201);
     }
+
 
 
     public function update(Request $request, Course $course)
@@ -60,5 +61,12 @@ class CourseController extends Controller
         $this->courses->delete($course->id);
 
         return response()->json(['message' => 'Deleted']);
+    }
+
+    public function index()
+    {
+        $this->authorize('getAll', Course::class);
+
+        return $this->courses->getAll();
     }
 }

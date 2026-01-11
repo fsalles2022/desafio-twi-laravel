@@ -1,12 +1,21 @@
 <?php
+
 namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
-class RoleSeeder extends Seeder {
-  public function run() {
-    Role::firstOrCreate(['name' => 'admin']);
-    Role::firstOrCreate(['name' => 'teacher']);
-    Role::firstOrCreate(['name' => 'student']);
-  }
+class RoleSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $roles = ['admin', 'teacher', 'student'];
+
+        foreach ($roles as $role) {
+            Role::firstOrCreate([
+                'name' => $role,
+                'guard_name' => 'sanctum', // 🔥 CRÍTICO
+            ]);
+        }
+    }
 }

@@ -12,6 +12,15 @@ use Spatie\Permission\Models\Role;
 class AuthControllerTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Traits\CreatesRoles;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        // cria roles necessárias
+        Role::firstOrCreate(['name' => 'student', 'guard_name' => 'sanctum']);
+    }
 
     /** @test */
     /** @test */

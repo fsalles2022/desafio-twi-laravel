@@ -6,26 +6,21 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Services\Course\CourseService;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use Tests\Traits\CreatesRoles;
 
 class CourseServiceTest extends TestCase
 {
     use RefreshDatabase;
+    use CreatesRoles;
 
     private CourseService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        // cria as roles no banco de teste
-        Role::create(['name' => 'teacher', 'guard_name' => 'api']);
-        Role::create(['name' => 'student', 'guard_name' => 'api']);
-
+        $this->createRoles(); // cria teacher, student, admin com guard sanctum
         $this->service = app(CourseService::class);
     }
-
-
 
     /** @test */
     public function teacher_pode_criar_curso()
@@ -35,9 +30,8 @@ class CourseServiceTest extends TestCase
 
         $course = $this->service->create(
             ['title' => 'Laravel'],
-            $teacher->id
+            $teacher // 👈 USER, não ID
         );
-
 
         $this->assertDatabaseHas('courses', [
             'id' => $course->id,
@@ -55,6 +49,6 @@ class CourseServiceTest extends TestCase
 
         $this->service->create([
             'title' => 'Curso proibido',
-        ], $student->id);
+        ], $student); // 👈 USER, não ID
     }
 }

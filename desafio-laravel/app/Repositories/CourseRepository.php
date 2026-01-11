@@ -48,7 +48,7 @@ class CourseRepository implements CourseRepositoryInterface
             ->firstOrFail();
     }
 
-    public function all(): iterable
+    public function getAll(): iterable
     {
         return Course::with(['user'])
             ->orderByDesc('id')

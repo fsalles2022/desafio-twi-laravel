@@ -10,17 +10,19 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-
+use Tests\Traits\CreatesRoles;
 
 class AuthServiceTest extends TestCase
 {
     use RefreshDatabase;
+    use CreatesRoles;
 
     private AuthService $authService;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->createRoles();
 
         // Cria a role padrão usada no AuthService
         Role::create([

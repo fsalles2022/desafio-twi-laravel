@@ -11,6 +11,6 @@ interface CourseRepositoryInterface
     public function delete(int $id): bool;
     public function find(int $id): Course;
     public function findBySlug(string $slug): Course;
-    public function all(): iterable;
+    public function getAll(): iterable;
     public function forTeacher(int $teacherId): iterable;
 }

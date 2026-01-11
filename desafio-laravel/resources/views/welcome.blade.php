@@ -8,7 +8,7 @@
 <body>
     <h1>🎬 Lista de Vídeos EAD</h1>
 
-    @if(count($videos) > 0)
+    {{-- @if(count($videos) > 0)
         @foreach($videos as $video)
             <div style="margin-bottom: 30px;">
                 <h3>{{ $video['name'] }}</h3>
@@ -20,6 +20,6 @@
         @endforeach
     @else
         <p>Nenhum vídeo disponível.</p>
-    @endif
+    @endif --}}
 </body>
 </html>
